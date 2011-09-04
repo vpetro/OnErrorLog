@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <title>{{ htmlTitle }}</title>
+        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css">
+
+        {% block scripts %}{% end %}
+    </head>
+    
+    <body>
+        <div class="topbar">
+            <div class="fill">
+                <div class="container">
+                    <h3><a href="#">OnErrorLog</a></h3>
+                    <ul class="nav">
+                        <li class="active"><a href="/">Home</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href=/content">Contact</a></li>
+                        <li><a href=/docs">Documentation</a></li>
+                        <li><a href="#">Source</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <h1>OnErrorLog</h1>
+
+        {% block mainContent %}{% end %}
+
+    </body>
+</html>

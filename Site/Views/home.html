@@ -1,0 +1,49 @@
+{% extends "base-main.html" %}
+
+{% block script %}
+
+{% end %}
+
+{% block mainContent %}
+
+<table>
+    <tr>
+        <td width="400">
+            <form method="post" action="/newuser">
+            <h2>Create a new API Key</h2>
+            <table>
+                <tr>
+                    <td>Organization:</td>
+                    <td><input type="text" name="organization" id="organization" /></td>
+                </tr>
+                <tr>
+                    <td>Username:</td>
+                    <td><input type="text" name="username" id="username" /></td>
+                </tr>
+                <tr>
+                    <td>Password:</td>
+                    <td><input type="password" name="password" id="password" /></td>
+                </tr>
+            </table>
+        </form>
+        </td>
+        <td>
+            <form method="post" action="/login">
+            <h2>Existing User</h2>
+            <table>
+                <tr>
+                    <td>Username:</td>
+                    <td><input type="text" name="username" id="username" /></td>
+                </tr>
+                <tr>
+                    <td>Password:</td>
+                    <td><input type="password" name="password" id="password" /></td>
+                </tr>
+            </table>
+        </form>
+        </td>
+    </tr>
+</table>
+
+
+{% end %}
