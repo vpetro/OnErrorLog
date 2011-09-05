@@ -39,7 +39,10 @@ class OnErrorLog():
         if parameters:
             formatted_arguments = {}
             for key in parameters:
-                formatted_arguments[key] = ','.join(parameters[key])
+                if type(parameters[key]) == type([]):
+                    formatted_arguments[key] = ','.join(parameters[key])
+                else:
+                    formatted_arguments[key] = parameters[key]
 
             d['params'] = formatted_arguments
 
