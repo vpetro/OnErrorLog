@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <title>{{ htmlTitle }}</title>
+        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css">
+
+        <style>
+            .selected { font-weight: bold; }
+        </style>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+        {% block scripts %}
+            
+        {% end %}
+    </head>
+    
+    <body>
+        <form action="/dashboard" method="get">
+        {% include "top-menu.html" %}
+        
+        <div class="container-fluid">
+            
+            <div class="sidebar" style="margin-top: 60px;">
+                <h3>Search</h3>
+                <fieldset>
+                    <div class="clearfix">
+                        <input type="text" name="keyword" id="keywowrd" value="{{ keyword }}" />
+                    </div>
+                </fieldset>
+                {% block sideBar %}{% end %}
+            </div>
+            <div class="content"  style="margin-top: 60px; min-height: 500px;">
+                <h1>{{ section_title }}</h1>
+                {% block mainContent %}{% end %} 
+            </div>
+            
+            <footer>
+                <p>&copy; GoldixMedia Inc. 2011</p>
+            </footer>
+        </div>
+        </form>
+    </body>
+</html>
+

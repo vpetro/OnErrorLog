@@ -1,0 +1,140 @@
+{% extends "base-sidebar.html" %}
+
+{% block scripts %}
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        $('#select_all').change(function() {
+            trs = $('.zebra-striped').find("tr")
+
+            for (i = 0;i<=trs.length;i++)
+            {
+                if (trs[i] != undefined)
+                {
+                    cb = $($(trs[i]).find('td')[0]).find('input')[0]
+                    if (cb != undefined)
+                    {
+                        cb.checked = this.checked;
+                    }
+                }
+            }
+        });
+
+        $('.cbException').change(function() {
+            toggleArchiveButton();
+        });
+
+    });
+
+    function toggleArchiveButton(){
+        
+        if ($('#archiveBtn')[0].className.indexOf('disabled') == -1)
+        {
+            $('#archiveBtn')[0].className = $('#archiveBtn')[0].className + 'disabled'
+        }
+
+        trs = $('.zebra-striped').find("tr")
+
+        for (i = 0;i<=trs.length;i++)
+        {
+            if (trs[i] != undefined)
+            {
+                cb = $($(trs[i]).find('td')[0]).find('input')[0]
+                if (cb != undefined) {
+                    if (cb.checked)
+                    {
+                        $('#archiveBtn')[0].className = $('#archiveBtn')[0].className.replace('disabled', '');
+                        return
+                    }
+                }
+            }
+        }
+
+        $('#select_all')[0].checked = false;
+    }
+
+</script>
+    
+{% end %}
+
+{% block sideBar %}
+    {% include "sidebar.html" %}
+{% end %}
+
+{% block mainContent %}
+<div class="span16 columns" style="background-color: #f5f5f5; padding: 5px 10px 5px 10px">
+    <input type="radio" name="log_choice" id="all" value="all" {% if not log_choice or log_choice == 'all' %}checked="checked"{% end %} /> All Requests
+    &nbsp;&nbsp;
+    <input type="radio" name="log_choice" id="specific" value="specific" {% if log_choice == 'specific' %}checked=checked{% end %} /> Logs with this specific severity level
+    <select name="severity_level" id="severity_level" class="medium">
+        <option value="3" {% if severity == 3 %}selected="selected"{% end %}>Debug</option>
+        <option value="2" {% if severity == 2 %}selected="selected"{% end %}>Info</option>
+        <option value="1" {% if severity == 1 %}selected="selected"{% end %}>Error</option>
+        <option value="0" {% if severity == 0 %}selected="selected"{% end %}>Critical</option>
+    </select>
+    &nbsp;
+    &nbsp;
+    <button type="submit" class="btn">Refresh Log</button>
+    <input type="hidden" name="app" value="{{ current_application }}" />
+</div>
+
+<div style="float: right;">
+    <div class="pagination">
+        <ul>
+            <li class="prev {{ page_status['previous'] }}">
+                <a {% if not page_status['previous'] %}href="{{ page_link + str(previous_page) }}"{% end %}>← Previous</a>
+            </li>
+            {% for i in range(start_page, max_pages + start_page) %}
+                <li class="{% if page == i %}active{% end %} {{ page_status[i] }}"><a href="{{ page_link + str(i) }}">{{ i }}</a></li>
+            {% end %}
+            <li class="next {{ page_status['next'] }}"><a {% if not page_status['next'] %}href="{{ page_link + str(next_page) }}"{% end %}>Next →</a></li>
+        </ul>
+    </div>
+</div>
+
+<table class="zebra-striped">
+    <thead>
+        <tr>
+        <th style="width: 1%"><input type="checkbox" id="select_all" /></th>
+        <th>Last Seen On</th>
+        <th>Message</th>
+        <th>File</th>
+        <th>Severity</th>
+        <th style="text-align: right;">Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for exception in exceptions %}
+            <tr>
+                <td>
+                    {% if not exception['status'] %}
+                    <input type="checkbox" class="cbException" name="exception" value="{{ exception['unique_hash'] }}" />
+                    {% end %}
+                </td>
+                <td>{{ pretty_date(exception['last_seen_on']) }}</td>
+                <td><a href="details?id={{ exception['_id'] }}&app={{ exception['application'] }}">{{ exception['message'] }}</a></td>
+                <td>{{ exception['filename'] }}</td>
+                <td>{{ get_severity_string(exception['severity']) }}</td>
+                <td style="text-align: right;">{{ exception['count'] }}</td>
+            </tr>
+        {% end %}
+    </tbody>
+</table>
+
+<div style="padding: 18px 0px 23px 0px; float: left;">
+    <input type="submit" class="btn primary disabled" value="Archive" id="archiveBtn" />
+</div>
+<div style="float: right;">
+    <div class="pagination">
+        <ul>
+            <li class="prev {{ page_status['previous'] }}">
+                <a {% if not page_status['previous'] %}href="{{ page_link + str(previous_page) }}"{% end %}>← Previous</a>
+            </li>
+            {% for i in range(start_page, max_pages + start_page) %}
+                <li class="{% if page == i %}active{% end %} {{ page_status[i] }}"><a href="{{ page_link + str(i) }}">{{ i }}</a></li>
+            {% end %}
+            <li class="next {{ page_status['next'] }}"><a {% if not page_status['next'] %}href="{{ page_link + str(next_page) }}"{% end %}>Next →</a></li>
+        </ul>
+    </div>
+</div>
+{% end %}

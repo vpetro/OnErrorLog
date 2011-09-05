@@ -1,0 +1,11 @@
+<h3>Applications</h3>
+
+<table>
+    {% for app in applications %}
+    <tr>
+        <td><a href="/dashboard?app={{ app['_id'] }}" {% if current_application == str(app['_id']) %}class="selected"{% end %}>{{ app['application'] }} ({{ app['count'] }})</a></td>
+    </tr>
+    {% end %}
+</table>
+<h3>Your API Key:</h3>
+<strong>{{ user['_id'] }}</strong>

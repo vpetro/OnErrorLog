@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <title>{{ htmlTitle }}</title>
+        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css">
+
+        {% block scripts %}{% end %}
+    </head>
+    
+    <body>
+        {% include "top-menu.html" %}
+        <div class="container">
+            {% block mainContent %}{% end %}
+
+            <footer>
+                <p>&copy; GoldixMedia Inc. 2011</p>
+            </footer>
+        </div>
+
+    </body>
+</html>

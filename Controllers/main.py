@@ -5,6 +5,9 @@ import tornado.ioloop
 
 from Services import Logging
 from Controllers.HomeHandler import HomeHandler
+from Controllers.DashboardHandler import DashboardHandler, DetailsHandler
+from Controllers.UserHandler import NewUserHandler, LogoutHandler, LoginHandler
+from Controllers.ExceptionHandler import AddExceptionHandler, ListExceptionGroupsHandler
 
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Views', 'static'))
 Logging.Init('onerroglog-web', echo=True)
@@ -26,6 +29,18 @@ if __name__ == '__main__':
 
         (r'/', HomeHandler),
 
+        #User Account Routes
+        (r'/newuser', NewUserHandler),
+        (r'/logout', LogoutHandler),
+        (r'/login', LoginHandler),
+        
+        #General Functionality
+        (r'/dashboard', DashboardHandler),
+        (r'/details', DetailsHandler),
+
+        #API Routes
+        (r'/v1/exception/add', AddExceptionHandler),
+        (r'/v1/groups/list', ListExceptionGroupsHandler),
      ]
 
     settings = {

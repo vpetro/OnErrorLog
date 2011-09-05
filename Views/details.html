@@ -1,0 +1,93 @@
+{% extends "base-sidebar.html" %}
+
+{% block script %}
+
+{% end %}
+
+{% block sideBar %}
+    {% include "sidebar.html" %}
+{% end %}
+
+{% block mainContent %}
+
+<h3>General Details</h3>
+<table>
+    <tr>
+        <td><strong>Filaneme</strong>:</td>
+        <td>{{ exception_group['message'] }}</td>
+        <td><strong>First Seen</strong>:</td>
+        <td>{{ pretty_date(exception_group['insert_date']) }}</td>
+        
+    </tr>
+    <tr>
+        <td><strong>Severity</strong>:</td>
+        <td>{{ get_severity_string(exception_group['severity']) }}</td>
+        <td><strong>Last Seen</strong>:</td>
+        <td>{{ pretty_date(exception_group['last_seen_on']) }}</td>
+    </tr>
+</table>
+
+<h3>Stacktrace</h3>
+<div class="span16">
+    {% if exception_group['stacktrace'] %}
+        {% for s in exception_group['stacktrace'] %}
+        <div style="padding-top: 8px;">
+            File "{{ s['filename'] }}", line {{ s['line_number'] }}, in {{ s['function_name'] }}<br/>
+            &nbsp;&nbsp;&nbsp; {{ s['method'] }}
+        </div>
+        {% end %}
+    {% else %}
+        Not Available
+    {% end %}
+</div>
+
+<br/>
+
+<h3>Exceptions</h3>
+
+<table class="zebra-striped">
+    <thead>
+    <tr>
+        <th>Seen on</th>
+        <th>Headers</th>
+        <th>Parameters</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for ex in exceptions %}
+        <tr>
+            <td style="vertical-align: top">{{ pretty_date(ex['insert_date']) }}</td>
+            <td style="vertical-align: top">
+                {% if 'headers' in ex %}
+                    {% for k, v in ex['headers'].iteritems() %}
+                        <div style="padding-top: 5px;">
+                            <strong>{{ k }}</strong>: {{ v[0:80] }}
+                        </div>
+                    {% end %}
+                {% else %}
+                    Not Available
+                {% end %}
+            </td>
+            <td style="vertical-align: top">
+                {% if 'params' in ex %}
+                    {% for k, v in ex['params'].iteritems() %}
+                        <div style="padding-top: 5px;">
+                            <strong>{{ k }}</strong>: {{ v[0:80] }}
+                        </div>
+                    {% end %}
+                {% else %}
+                    Not Available
+                {% end %}
+            </td>
+        </tr>
+        {% if 'url' in ex %}
+            <tr>
+                <td colspan="3">
+                    <strong>Url</strong>: {{ ex['url'] }}<br/><br/><br/><br/>
+                </td>
+            </tr>
+        {% end %}
+    {% end %}
+    </tbody>
+</table>
+{% end %}

@@ -1,0 +1,104 @@
+{% extends "base-main.html" %}
+
+{% block script %}
+
+{% end %}
+
+{% block mainContent %}
+
+<!-- Main hero unit for a primary marketing message or call to action -->
+<div class="hero-unit">
+    <h1>OnErrorLog</h1>
+    <p>
+        <em>OnErrorLog</em> is an open source application that collects errors or log entries from your applications, organizes them for you, and makes it easy to review them.  
+        If you are interested in using OnErrorLog, you can use this service, or download the code from our github repository and install it on your own server.
+    </p>
+    <p><a class="btn primary large">Learn more &raquo;</a></p>
+</div>
+
+<div class="row">
+    <div class="span8">
+        <h2>Generate a New API Key</h2>
+        {% if not error %}
+            Register to OnErrorLog to retrieve a new API key and start using it now.
+        {% else %}
+        <div class="alert-message error" style="margin-bottom: 0px;">
+            <p>
+            {% if error == 'required' %}
+                All the fields are required when generating a new API Key.
+            {% else %}
+                It appears that you or somebody else has already created an API Key with this username and/or email address.
+                {% end %}
+                </p>
+        </div>
+        {% end %}
+        <form method="post" action="/newuser">
+            <fieldset>
+                <div class="clearfix">
+                    <label for="company_name">Company Name:</label>
+                    <div class="input">
+                        <input type="text" name="company_name" id="company_name" />
+                    </div>
+                </div>
+                <div class="clearfix">
+                    <label for="username">Username:</label>
+                    <div class="input">
+                        <input type="text" name="username" id="username" />
+                    </div>
+                </div>
+                <div class="clearfix">
+                    <label for="email">Email Address:</label>
+                    <div class="input">
+                        <input type="text" name="email" id="email" />
+                    </div>
+                </div>
+                <div class="clearfix">
+                    <label for="password">Password:</label>
+                    <div class="input">
+                        <input type="password" name="password" id="password" />
+                    </div>
+                </div>
+                <div  style="margin-top: 20px; text-align: right; margin-right: 90px;">
+                    <button class="btn primary">Generate Key</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <div class="span8">
+            <h2>Existing User</h2>
+            {% if not errorlogin %}
+                Already have a key, login to view your log.
+            {% else %}
+            <div class="alert-message error" style="margin-bottom: 0px;">
+                <p>
+                {% if errorlogin == 'required' %}
+                    You must enter a username and password if you're trying to login!.
+                {% else %}
+                    It appears that you've tried the wrong username and/or password
+                    {% end %}
+                    </p>
+            </div>
+            {% end %}
+            <form method="post" action="/login">
+            <fieldset style="margin-top: 20px;">
+                <div class="clearfix">
+                    <label for="username">Username:</label>
+                    <div class="input">
+                        <input type="text" name="username" id="username" />
+                    </div>
+                </div>
+                <div class="clearfix">
+                    <label for="password">Password:</label>
+                    <div class="input">
+                        <input type="password" name="password" id="password" />
+                    </div>
+                </div>
+                <div  style="margin-top: 20px; text-align: right; margin-right: 90px;">
+                    <button class="btn primary">Login</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+{% end %}
