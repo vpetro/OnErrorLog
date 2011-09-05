@@ -1,4 +1,5 @@
 from pymongo import Connection
+import config
 
 class Instance:
     """ A python singleton """
@@ -7,19 +8,19 @@ class Instance:
         """ Implementation of the singleton interface """
 
         def exceptions(self):
-            return Connection()['onerrorlog']['exception']
+            return Connection(config.MONGODB_HOST, config.MONGODB_PORT)[config.MONGODB_NAME]['exception']
         
         def exception_groups(self):
-            return Connection()['onerrorlog']['exception_group']
+            return Connection(config.MONGODB_HOST, config.MONGODB_PORT)[config.MONGODB_NAME]['exception_group']
 
         def applications(self):
-            return Connection()['onerrorlog']['applications']
+            return Connection(config.MONGODB_HOST, config.MONGODB_PORT)[config.MONGODB_NAME]['applications']
 
         def accounts(self):
-            return Connection()['onerrorlog']['accounts']
+            return Connection(config.MONGODB_HOST, config.MONGODB_PORT)[config.MONGODB_NAME]['accounts']
 
         def db(self):
-            return Connection()['onerrorlog']
+            return Connection(config.MONGODB_HOST, config.MONGODB_PORT)[config.MONGODB_NAME]
 
     # storage for the instance reference
     __instance = None

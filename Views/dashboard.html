@@ -108,7 +108,7 @@
             <tr>
                 <td>
                     {% if not exception['status'] %}
-                    <input type="checkbox" class="cbException" name="exception" value="{{ exception['unique_hash'] }}" />
+                    <input type="checkbox" class="cbException" name="exception" value="{{ exception['_id'] }}" />
                     {% end %}
                 </td>
                 <td>{{ pretty_date(exception['last_seen_on']) }}</td>

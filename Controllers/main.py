@@ -4,7 +4,7 @@ import tornado.httpserver
 import tornado.ioloop
 
 from Services import Logging
-from Controllers.HomeHandler import HomeHandler
+from Controllers.HomeHandler import HomeHandler, AboutHandler, DocsHandler
 from Controllers.DashboardHandler import DashboardHandler, DetailsHandler
 from Controllers.UserHandler import NewUserHandler, LogoutHandler, LoginHandler
 from Controllers.ExceptionHandler import AddExceptionHandler, ListExceptionGroupsHandler
@@ -37,6 +37,8 @@ if __name__ == '__main__':
         #General Functionality
         (r'/dashboard', DashboardHandler),
         (r'/details', DetailsHandler),
+        (r'/about', AboutHandler),
+        (r'/docs', DocsHandler),
 
         #API Routes
         (r'/v1/exception/add', AddExceptionHandler),

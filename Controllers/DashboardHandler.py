@@ -7,13 +7,17 @@ from Services import LoggingService
 class BaseDashboard(BaseHandler):
     def _global(self):
         self._data['applications'] = LoggingService.get_applications(self._data['user']['_id'])
+        self._data['keyword'] = ''
 
         #Get Applications
         app = self.get_argument('app', None)
         if not app:
-            app = str(LoggingService.get_first_application(self._data['user']['_id'])['_id'])
+            try:
+                app = str(LoggingService.get_first_application(self._data['user']['_id'])['_id'])
+            except:
+                return None
+
         self._data['current_application'] = app
-        self._data['keyword'] = ''
 
         return LoggingService.get_application_by_id(self._data['user']['_id'], app)
 
@@ -70,7 +74,7 @@ class DashboardHandler(BaseDashboard):
         exception = self.get_arguments('exception', None)
         if exception:
             for ex in exception:
-                LoggingService.archive_exceptiong_roup(int(ex))
+                LoggingService.archive_exceptiong_roup(ex)
 
         app = self._global()
 
@@ -86,11 +90,12 @@ class DashboardHandler(BaseDashboard):
 
         #Get Exceptions
         keyword = self.get_argument('keyword', '')
+        
 
-        if not keyword:
+        if not keyword and app:
             self._data['exceptions'] = LoggingService.get_exceptions_groups(self._data['user']['_id'], app['_id'], severity=severity, start=start)
             total_count = self._data['exceptions'].count()
-        else:
+        elif keyword:
             from Packages.mongodbsearch import mongodbsearch
             from pymongo import Connection
 
@@ -108,18 +113,27 @@ class DashboardHandler(BaseDashboard):
 
             for doc in documents:
                 self._data['exceptions'].append(LoggingService.get_exception_group(doc['_id']))
-            
+        else:
+            self._data['exceptions'] = []
+            total_count = 0
 
-        self._data['log_choice'] = log_choice
-        self._data['severity'] = severity
-        self._data['get_severity_string'] = LoggingService.get_severity_string
-        self._data['keyword'] = keyword
-       
-        self._compute_paging(page, total_count)
+        if app:
+            self._data['log_choice'] = log_choice
+            self._data['severity'] = severity
+            self._data['get_severity_string'] = LoggingService.get_severity_string
+            self._data['keyword'] = keyword
+            self._compute_paging(page, total_count)
+        
+            self._data['section_title'] = 'Dashboard : %s : %s' % (self._data['user']['company_name'], app['application'])
+            self._data['htmlTitle'] = 'OnErrorLog - Dashboard'
+            self.write(self.render_view('../Views/dashboard.html', self._data))
 
-        self._data['section_title'] = 'Dashboard : %s : %s' % (self._data['user']['company_name'], app['application'])
-        self._data['htmlTitle'] = 'OnErrorLog - Dashboard'
-        self.write(self.render_view('../Views/dashboard.html', self._data))
+        else:
+            self._data['section_title'] = 'Getting Started'
+            self._data['htmlTitle'] = 'OnErrorLog - Getting Started'
+            self.write(self.render_view('../Views/gettingstarted.html', self._data))
+
+        
 
 class DetailsHandler(BaseDashboard):
     @tornado.web.authenticated

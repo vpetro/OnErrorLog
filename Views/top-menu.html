@@ -3,11 +3,10 @@
         <div class="container">
             <h3><a href="#">OnErrorLog</a></h3>
             <ul class="nav">
-                <li class="active"><a href="/">Home</a></li>
+                <li class="active"><a href="{% if user %}/dashboard{% else %}/{% end %}">Home</a></li>
                 <li><a href="/about">About</a></li>
-                <li><a href=/content">Contact</a></li>
-                <li><a href=/docs">Documentation</a></li>
-                <li><a href="#">Source</a></li>
+                <li><a href="/docs">Documentation</a></li>
+                <li><a href="https://github.com/dominicplouffe/OnErrorLog" target="_new">Source</a></li>
                 {% if user %}
                 <li><a href="/logout" style="color: orange;">Logout</a></li>
                 {% end %}

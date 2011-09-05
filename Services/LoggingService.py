@@ -223,7 +223,7 @@ def get_exception_group(exception_group_id):
     return exception_groups.find_one({'_id': exception_group_id})
 
 def archive_exceptiong_roup(unique_hash):
-    group = get_exception_group(int(unique_hash))
+    group = get_exception_group(unique_hash)
 
     if not group: return
     

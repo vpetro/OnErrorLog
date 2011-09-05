@@ -1,0 +1,41 @@
+<p>Follow these examples below to get started.</p>
+
+<h3>Inserting an Exception</h3>
+Copy the Client Library in your application and follow this example to insert your first exception:
+
+<div style="background-color: #f0f0f0; margin-top: 10px; padding: 10px; line-height: 18px; font-family: Courier; -webkit-border-radius: 6px; -moz-border-radius: 6px; border-radius: 6px;">
+    from Packages.onerrorlog import onerrorlog<br/>
+    <br/>
+    onerrorlog_url = 'http://www.onerrorlog'<br/>
+    api_key = '4e62d31abc98554d11000000' <strong>#Get this from the side bar once you logged in</strong><br/>
+    application_name = 'MyAppName' <strong>#You can arbitrarily choose an application name</strong><br/>
+    <br/>
+    <strong>#Instantiate the onerrorlog client</strong><br/>
+    on_client = onerrorlog.OnErrorLog(onerrorlog_url, api_key, application_name)<br/>
+    <br/>
+    self.on_client.send_log('This is a sample message', onerrorlog.SEVERITY_DEBUG)
+</div>
+<br/><br/>
+<h3>Using the Client In A Web Application</h3>
+The following is a sample log entry using a web application, in this case <em>tornado</em>.
+<div style="background-color: #f0f0f0; margin-top: 10px; padding: 10px; line-height: 18px; font-family: Courier; -webkit-border-radius: 6px; -moz-border-radius: 6px; border-radius: 6px;">
+
+    def send_error(self, status_code, **kwargs):<br/>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;from Packages.onerrorlog import onerrorlog<br/>
+    <br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;onerrorlog_url = 'http://www.onerrorlog'<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;api_key = '4e62d31abc98554d11000000' <strong>#Get this from the side bar once you logged in</strong><br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;application_name = 'MyAppName' <strong>#You can arbitrarily choose an application name</strong><br/>
+    <br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;<strong>#Instantiate the onerrorlog client</strong><br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;on_client = onerrorlog.OnErrorLog(onerrorlog_url, api_key, application_name)<br/>
+    <br/>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;self.on_client.send_log(kwargs['exception'], onerrorlog.SEVERITY_ERROR, filename=str(self.__class__.__name__),<br/> 
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;url=self.request.full_url(), status_code=status_code,<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;headers=self.request.headers, parameters=self.request.arguments)<br/>
+    <br/><br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;self.finish()
+</div>
+
