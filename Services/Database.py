@@ -1,5 +1,5 @@
 from pymongo import Connection
-import config
+from Services import config
 
 class Instance:
     """ A python singleton """

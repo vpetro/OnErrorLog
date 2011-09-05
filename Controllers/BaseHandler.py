@@ -1,4 +1,3 @@
-import tornadotoad
 import tornado.web
 import tornado.template
 import json
