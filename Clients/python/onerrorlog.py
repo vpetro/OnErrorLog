@@ -97,6 +97,9 @@ class OnErrorLog():
         return d
 
 
+    def _build_url(self):
+        return "%s%s" % (self._url, ACTION_ADD_EXCEPTION)
+
     def send_log(self,
             message,
             severity,
@@ -119,7 +122,7 @@ class OnErrorLog():
 
         import urllib2
         headers = {'User-Agent': USER_AGENT }
-        req = urllib2.Request('%s%s' % (self._url, ACTION_ADD_EXCEPTION), json.dumps(d), headers)
+        req = urllib2.Request(self._build_url(), json.dumps(d), headers)
 
         response = urllib2.urlopen(req)
         return response.read()
@@ -134,5 +137,23 @@ class OnErrorLog():
             parameters=None,
             stacktrace=False):
         from tornado.httpclient import AsyncHTTPClient
+
+        d = self._build_message(
+                message,
+                severity,
+                filename,
+                url,
+                status_code,
+                headers,
+                parameters,
+                stacktrace)
+
+        # want to use the better client here.
         AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
-        AsyncHTTPClient().fetch(url, lambda resp: None, method="POST", headers=headers)
+
+        AsyncHTTPClient().fetch(
+                self._build_url(),
+                lambda resp: None,
+                method="POST",
+                body=json.dumps(d),
+                headers=headers)
