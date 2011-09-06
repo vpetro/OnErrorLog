@@ -59,6 +59,7 @@ class OnErrorLog():
                             } 
                             for fname, line_number, function_name, method in stacktrace]
         return d
+
     def _add_exception_trace(self, d):
         exc_type, exc_value, exc_traceback = sys.exc_info()
         trace = []
@@ -94,6 +95,11 @@ class OnErrorLog():
         d = self._add_optional_values(d, headers, url, status_code)
         d = self._add_parameters(d, parameters)
         d = self._add_filename(d, filename)
+
+        if not stacktrace:
+            d = self._add_stacktrace(d)
+        else:
+            d = self._add_exception_trace(d)
         return d
 
 
