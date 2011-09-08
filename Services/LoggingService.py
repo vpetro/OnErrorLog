@@ -94,11 +94,12 @@ def insert_exception(d):
         d['stacktrace'] = ''
 
     #Setup the string to be hashed
-    hash_string = '%s\n%s\n%s\n%s' % (d['key'], 
+    hash_string = '%s\n%s\n%s\n%s\n%s' % (d['key'], 
                                    d['severity'],
                                    str(d['stacktrace']),
-                                   d['message'])
-
+                                   d['message'],
+                                   d['filename'])
+    
     #Has the string
     unique_hash = hash(hash_string)
 
