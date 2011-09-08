@@ -74,6 +74,8 @@ class BaseDashboard(BaseHandler):
 class DashboardHandler(BaseDashboard):
     @tornado.web.authenticated
     def get(self):
+        
+        global ITEMS_PER_PAGE
 
         #Check if there are any exceptions to archive, if so
         exception = self.get_arguments('exception', None)
@@ -86,12 +88,12 @@ class DashboardHandler(BaseDashboard):
         #Get Severity
         severity = None
         log_choice = self.get_argument('log_choice', None)
-        if log_choice == 'specific':
-            severity = int(self.get_argument('severity_level', 3))
+        if log_choice != 'specific':
+            severity = int(self.get_argument('severity_level', 1))
 
         #Get Page and Offset
         page = int(self.get_argument('page', 1))
-        start = (page * 10) - 10
+        start = (page * ITEMS_PER_PAGE) - ITEMS_PER_PAGE
 
         #Get Exceptions
         keyword = self.get_argument('keyword', '')

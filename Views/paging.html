@@ -1,0 +1,17 @@
+<div style="float: right;">
+    <div class="pagination">
+        <ul>
+            <li class="prev {{ page_status['previous'] }}">
+                <a {% if not page_status['previous'] %}href="{{ page_link + str(previous_page) }}"{% end %}>← Previous</a>
+            </li>
+            {% for i in range(start_page, max_pages + start_page) %}
+            <li class="{% if page == i %}active{% end %} {{ page_status[i] }}">
+            <a {% if not page_status[i] %}href="{{ page_link + str(i) }}" {% end %}>{{ i }}</a>
+            </li>
+            {% end %}
+            <li class="next {{ page_status['next'] }}">
+                <a {% if not page_status['next'] %}href="{{ page_link + str(next_page) }}"{% end %}>Next →</a>
+            </li>
+        </ul>
+    </div>
+</div>
