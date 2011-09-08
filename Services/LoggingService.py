@@ -191,7 +191,7 @@ def insert_exception(d):
 
     return exception_group_id, exception_id
 
-def get_exceptions_groups(key, application, severity=None, status=False, start=0, maxrecs=10, since=None):
+def get_exceptions_groups(key, application, severity=None, status=False, start=0, maxrecs=20, since=None):
 
     exception_groups = Database.Instance().exception_groups()
 

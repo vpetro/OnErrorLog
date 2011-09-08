@@ -4,6 +4,12 @@
 <script type="text/javascript">
 
     $(document).ready(function() {
+
+        $('#severity_level').change(function() {
+            $('#all')[0].checked = false;
+            $('#specific')[0].checked = true;
+        });
+
         $('#select_all').change(function() {
             trs = $('.zebra-striped').find("tr")
 
@@ -18,6 +24,8 @@
                     }
                 }
             }
+
+            toggleArchiveButton();
         });
 
         $('.cbException').change(function() {
@@ -63,9 +71,9 @@
 
 {% block mainContent %}
 <div class="span16 columns" style="background-color: #f5f5f5; padding: 5px 10px 5px 10px">
-    <input type="radio" name="log_choice" id="all" value="all" {% if not log_choice or log_choice == 'all' %}checked="checked"{% end %} /> All Requests
+    <input type="radio" name="log_choice" id="all" value="all" {% if log_choice == 'all' %}checked="checked"{% end %} /> All Requests
     &nbsp;&nbsp;
-    <input type="radio" name="log_choice" id="specific" value="specific" {% if log_choice == 'specific' %}checked=checked{% end %} /> Logs with this specific severity level
+    <input type="radio" name="log_choice" id="specific" value="specific" {% if not log_choice or log_choice == 'specific' %}checked=checked{% end %} /> Logs with this specific severity level
     <select name="severity_level" id="severity_level" class="medium">
         <option value="3" {% if severity == 3 %}selected="selected"{% end %}>Debug</option>
         <option value="2" {% if severity == 2 %}selected="selected"{% end %}>Info</option>
@@ -78,20 +86,8 @@
     <input type="hidden" name="app" value="{{ current_application }}" />
 </div>
 
-<div style="float: right;">
-    <div class="pagination">
-        <ul>
-            <li class="prev {{ page_status['previous'] }}">
-                <a {% if not page_status['previous'] %}href="{{ page_link + str(previous_page) }}"{% end %}>← Previous</a>
-            </li>
-            {% for i in range(start_page, max_pages + start_page) %}
-                <li class="{% if page == i %}active{% end %} {{ page_status[i] }}"><a href="{{ page_link + str(i) }}">{{ i }}</a></li>
-            {% end %}
-            <li class="next {{ page_status['next'] }}"><a {% if not page_status['next'] %}href="{{ page_link + str(next_page) }}"{% end %}>Next →</a></li>
-        </ul>
-    </div>
-</div>
 
+{% include "paging.html" %}
 <table class="zebra-striped">
     <thead>
         <tr>
@@ -104,6 +100,13 @@
         </tr>
     </thead>
     <tbody>
+        {% if exceptions.count() == 0 %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 20px;">
+                    <strong>No log entries found.</strong>
+                </td>
+            </tr>
+        {% end %}
         {% for exception in exceptions %}
             <tr>
                 <td>
@@ -124,17 +127,7 @@
 <div style="padding: 18px 0px 23px 0px; float: left;">
     <input type="submit" class="btn primary disabled" value="Archive" id="archiveBtn" />
 </div>
-<div style="float: right;">
-    <div class="pagination">
-        <ul>
-            <li class="prev {{ page_status['previous'] }}">
-                <a {% if not page_status['previous'] %}href="{{ page_link + str(previous_page) }}"{% end %}>← Previous</a>
-            </li>
-            {% for i in range(start_page, max_pages + start_page) %}
-                <li class="{% if page == i %}active{% end %} {{ page_status[i] }}"><a href="{{ page_link + str(i) }}">{{ i }}</a></li>
-            {% end %}
-            <li class="next {{ page_status['next'] }}"><a {% if not page_status['next'] %}href="{{ page_link + str(next_page) }}"{% end %}>Next →</a></li>
-        </ul>
-    </div>
-</div>
+
+{% include "paging.html" %}
+
 {% end %}

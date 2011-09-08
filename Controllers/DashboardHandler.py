@@ -4,7 +4,10 @@ import re
 from Controllers.BaseHandler import BaseHandler
 from Services import LoggingService
 
+ITEMS_PER_PAGE = 20
+
 class BaseDashboard(BaseHandler):
+
     def _global(self):
         self._data['applications'] = LoggingService.get_applications(self._data['user']['_id'])
         self._data['keyword'] = ''
@@ -22,6 +25,8 @@ class BaseDashboard(BaseHandler):
         return LoggingService.get_application_by_id(self._data['user']['_id'], app)
 
     def _compute_paging(self, page, total_count):
+        global ITEMS_PER_PAGE
+
         start_page = 1
         max_pages = 5
         next_page = ''
@@ -31,7 +36,7 @@ class BaseDashboard(BaseHandler):
                   'next': 'disabled' }
 
         if page > 3: 
-            if page * 10 > total_count:
+            if page * ITEMS_PER_PAGE > total_count:
                 start_page = page - 4
             elif (page +1) * 10 > total_count:
                 start_page = page - 3
@@ -42,15 +47,15 @@ class BaseDashboard(BaseHandler):
             page_status['previous'] = ''
             previous_page = page - 1
        
-        if page * 10 < total_count:
+        if page * ITEMS_PER_PAGE < total_count:
             page_status['next'] = ''
             next_page = page + 1
         
 
         for i in range(start_page, start_page + max_pages):
-            if i * 10 <= total_count:
+            if i * ITEMS_PER_PAGE <= total_count:
                 page_status[i] = ''
-            elif (i-1) * 10 <= total_count:
+            elif (i-1) * ITEMS_PER_PAGE <= total_count:
                 page_status[i] = ''
             else:
                 page_status[i] = 'disabled'
@@ -69,6 +74,8 @@ class BaseDashboard(BaseHandler):
 class DashboardHandler(BaseDashboard):
     @tornado.web.authenticated
     def get(self):
+        
+        global ITEMS_PER_PAGE
 
         #Check if there are any exceptions to archive, if so
         exception = self.get_arguments('exception', None)
@@ -81,12 +88,12 @@ class DashboardHandler(BaseDashboard):
         #Get Severity
         severity = None
         log_choice = self.get_argument('log_choice', None)
-        if log_choice == 'specific':
-            severity = int(self.get_argument('severity_level', 3))
+        if log_choice != 'specific':
+            severity = int(self.get_argument('severity_level', 1))
 
         #Get Page and Offset
         page = int(self.get_argument('page', 1))
-        start = (page * 10) - 10
+        start = (page * ITEMS_PER_PAGE) - ITEMS_PER_PAGE
 
         #Get Exceptions
         keyword = self.get_argument('keyword', '')
