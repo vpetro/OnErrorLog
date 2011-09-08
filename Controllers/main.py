@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     settings = {
         'debug': True,
-        'login_url': '/login',
+        'login_url': '/',
         'cookie_secret': 'f904c1faa4367df7ed575751b0f1b5020a818635',
         'autoescape': None,
         'template_path' : root + '/..'

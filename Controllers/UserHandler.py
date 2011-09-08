@@ -45,3 +45,4 @@ class LoginHandler(BaseHandler):
         self.set_secure_cookie("_ur", json.dumps(account))
         
         self.redirect('/dashboard')
+
