@@ -88,7 +88,7 @@ class DashboardHandler(BaseDashboard):
         #Get Severity
         severity = None
         log_choice = self.get_argument('log_choice', None)
-        if log_choice != 'specific':
+        if log_choice is None or log_choice == 'specific':
             severity = int(self.get_argument('severity_level', 1))
 
         #Get Page and Offset

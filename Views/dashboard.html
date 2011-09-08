@@ -115,7 +115,14 @@
                     {% end %}
                 </td>
                 <td>{{ pretty_date(exception['last_seen_on']) }}</td>
-                <td><a href="details?id={{ exception['_id'] }}&app={{ exception['application'] }}">{{ exception['message'] }}</a></td>
+                <td><a href="details?id={{ exception['_id'] }}&app={{ exception['application'] }}">
+                        {% if len(exception['message']) == 0 %}
+                            .:: NO MESSAGE ::.
+                        {% else %}
+                            {{ exception['message'] }}
+                        {% end %}
+                    </a>
+                </td>
                 <td>{{ exception['filename'] }}</td>
                 <td>{{ get_severity_string(exception['severity']) }}</td>
                 <td style="text-align: right;">{{ exception['count'] }}</td>
