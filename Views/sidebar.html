@@ -8,7 +8,7 @@
     {% else %}
         {% for app in applications %}
         <tr>
-            <td><a href="/dashboard?app={{ app['_id'] }}" {% if current_application == str(app['_id']) %}class="selected"{% end %}>{{ app['application'] }} ({{ app['count'] }})</a></td>
+            <td><a href="/dashboard/{{ app['url_name'] }}" {% if current_application == str(app['_id']) %}class="selected"{% end %}>{{ app['application'] }} ({{ app['count'] }})</a></td>
         </tr>
         {% end %}
     {% end %}

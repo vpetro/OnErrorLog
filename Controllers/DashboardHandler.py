@@ -8,21 +8,31 @@ ITEMS_PER_PAGE = 20
 
 class BaseDashboard(BaseHandler):
 
-    def _global(self):
+    def _global(self, app_name):
         self._data['applications'] = LoggingService.get_applications(self._data['user']['_id'])
         self._data['keyword'] = ''
 
         #Get Applications
-        app = self.get_argument('app', None)
-        if not app:
-            try:
-                app = str(LoggingService.get_first_application(self._data['user']['_id'])['_id'])
-            except:
-                return None
+        if app_name:
 
-        self._data['current_application'] = app
+            app_name = app_name.replace('/', '')
+            app = LoggingService.get_application_by_url_name(self._data['user']['_id'], app_name)
+            
+            if not app:
+                raise tornado.web.HTTPError(404)
+            
+            self._data['current_application'] = app
 
-        return LoggingService.get_application_by_id(self._data['user']['_id'], app)
+            return app
+        else:
+            app = self.get_argument('app', None)
+            if not app:
+                try:
+                    app = str(LoggingService.get_first_application(self._data['user']['_id'])['_id'])
+                except:
+                    return None
+
+            self._data['current_application'] = app
 
     def _compute_paging(self, page, total_count):
         global ITEMS_PER_PAGE
@@ -73,7 +83,7 @@ class BaseDashboard(BaseHandler):
 
 class DashboardHandler(BaseDashboard):
     @tornado.web.authenticated
-    def get(self):
+    def get(self, app_name):
         
         global ITEMS_PER_PAGE
 
@@ -83,7 +93,7 @@ class DashboardHandler(BaseDashboard):
             for ex in exception:
                 LoggingService.archive_exceptiong_roup(ex)
 
-        app = self._global()
+        app = self._global(app_name)
 
         #Get Severity
         severity = None
@@ -97,7 +107,6 @@ class DashboardHandler(BaseDashboard):
 
         #Get Exceptions
         keyword = self.get_argument('keyword', '')
-        
 
         if not keyword and app:
             self._data['exceptions'] = LoggingService.get_exceptions_groups(self._data['user']['_id'], app['_id'], severity=severity, start=start)
