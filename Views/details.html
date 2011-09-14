@@ -32,8 +32,8 @@
     {% if exception_group['stacktrace'] %}
         {% for s in exception_group['stacktrace'] %}
         <div style="padding-top: 8px;">
-            File "{{ s['filename'] }}", line {{ s['line_number'] }}, in {{ s['function_name'] }}<br/>
-            &nbsp;&nbsp;&nbsp; {{ s['method'] }}
+            File "{% if 'url' in s %}<a href="{{ s['url'] }}" target="_blank">{% end %}{{ s['filename'] }}{% if 'url' in s %}</a>{% end %}", line {{ s['line_number'] }}, in {{ s['function_name'] }}<br/>
+            &nbsp;&nbsp;&nbsp; {{ cgi.escape(s['method']) }}
         </div>
         {% end %}
     {% else %}

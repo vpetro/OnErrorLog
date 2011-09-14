@@ -23,15 +23,14 @@ class BaseDashboard(BaseHandler):
             
             self._data['current_application'] = str(app['_id'])
 
-            return app
         else:
             app = LoggingService.get_first_application(self._data['user']['_id'])
-            if not app:
-                return None
-
             self._data['current_application'] = str(app['_id'])
 
-            return app
+        if app: app_name = app['url_name']
+        else: app_name = ''
+
+        return app, app_name
 
     def _compute_paging(self, page, total_count, app_name):
         global ITEMS_PER_PAGE
@@ -86,10 +85,7 @@ class DashboardHandler(BaseDashboard):
         
         global ITEMS_PER_PAGE
 
-        app = self._global(app_name)
-
-        if app: app_name = app['url_name']
-        else: app_name = ''
+        app, app_name = self._global(app_name)
 
         #Check if the Archive All flag was passed
         archive_all = self.get_argument('archive_all', None)
@@ -169,13 +165,68 @@ class DashboardHandler(BaseDashboard):
         
 
 class DetailsHandler(BaseDashboard):
+
+    def _find_github_url(self, sections, gh, github_account, github_repository, sha=None, path=[]):
+
+        try:
+            
+            if sha not in self.tree_dict:
+                tree = gh.objects.tree(github_account, github_repository, sha)
+                self.tree_dict[sha] = tree
+            else:
+                tree = self.tree_dict[sha]
+            
+            for name in sections:
+                if name in tree:
+                    node = tree[name]
+                    if node.type == 'blob':
+                        path.append(name)
+                        c = gh.commits.forFile(github_account, github_repository, '/'.join(path))
+                        
+                        url = c[0].url
+                        url = url.replace('commit', 'blob')
+                        url = url + '/%s' % '/'.join(path)
+                        return 'http://github.com%s' % (url)
+
+                    elif node.type == 'tree':
+                        path.append(name)
+                        return self._find_github_url(sections, gh, github_account, github_repository, sha=node.sha, path=path)
+
+        except Exception, e:
+            print str(e)
+            return None
+
+        return None
+    
     @tornado.web.authenticated
     def get(self, app_name, unique_hash):
-        
-        app = self._global(app_name)
+
+        self.tree_dict = {}
+
+        app, app_name = self._global(app_name)
+
+        import cgi
+        from Packages.github import github
+        gh = None
+        if 'github_account' in app and app['github_account'] and 'github_repository' in app and app['github_repository']:
+            if 'github_token' in app and app['github_token'] and 'github_username' in app and app['github_username']:
+                gh = github.GitHub(app['github_username'], app['github_token'])
+            else:
+                gh = github.GitHub()
 
         exception_group = LoggingService.get_exception_group(unique_hash)
         exceptions = LoggingService.gex_exceptions_in_group(unique_hash)
+
+        if gh:
+            sha = gh.commits.forBranch(app['github_account'], app['github_repository'])[0].id
+
+            for s in exception_group['stacktrace']:
+                sections = s['filename'].split('/')
+                path = []
+                url = self._find_github_url(sections, gh, app['github_account'], app['github_repository'], path=path, sha=sha)
+
+                if url:
+                    s['url'] = url
 
         self._data['exception_group'] = exception_group
         self._data['exceptions'] = exceptions
@@ -184,5 +235,34 @@ class DetailsHandler(BaseDashboard):
         self._data['get_severity_string'] = LoggingService.get_severity_string
         self._data['section_title'] = '%s : %s' % (app['application'], self._data['exception_group']['message'][0:60])
         self._data['htmlTitle'] = 'OnErrorLog - Dashboard'
+        self._data['cgi'] = cgi
+
         self.write(self.render_view('../Views/details.html', self._data))
+
+class ConfigureSaveHandler(BaseDashboard):
+
+    def post(self, app_name):
+        app, app_name = self._global(app_name)
+        
+
+        app['github_account'] = self.get_argument('github_account', None)
+        app['github_repository'] = self.get_argument('github_repository', None)
+        app['github_username'] = self.get_argument('github_username', None)
+        app['github_token'] = self.get_argument('github_token', None)
+
+        LoggingService.save_application(app)
+
+        self.redirect('/configure/%s' % app_name)
+
+class ConfigureHandler(BaseDashboard):
+    def get(self, app_name):
+        app, app_name = self._global(app_name)
+        
+        self._data['section_title'] = 'Configure : %s : %s' % (self._data['user']['company_name'], app['application'])
+        self._data['app_name'] = app_name
+        self._data['htmlTitle'] = 'OnErrorLog - Configuration'
+
+        self._data['app'] = app
+        self.write(self.render_view('../Views/configure.html', self._data))
+
 

@@ -9,13 +9,21 @@
             .selected { font-weight: bold; }
         </style>
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#configureBtn').click(function() {
+                    location.href = '/configure/{{ app_name }}';
+                });
+            });
+        </script>
         {% block scripts %}
             
         {% end %}
     </head>
     
     <body>
-        <form action="/dashboard/{{ app_name }}" method="get">
+        
         {% include "top-menu.html" %}
         
         <div class="container-fluid">
@@ -23,11 +31,13 @@
             <div class="sidebar" style="margin-top: 60px;">
                 {% if app_name %}
                 <h3>Search</h3>
-                <fieldset>
-                    <div class="clearfix">
-                        <input type="text" name="keyword" id="keywowrd" value="{{ keyword }}" />
-                    </div>
-                </fieldset>
+                <form action="/dashboard/{{ app_name }}" method="get">
+                    <fieldset>
+                        <div class="clearfix">
+                            <input type="text" name="keyword" id="keywowrd" value="{{ keyword }}" />
+                        </div>
+                    </fieldset>
+                </form>
                 {% end %}
                 {% block sideBar %}{% end %}
             </div>
@@ -41,7 +51,6 @@
                 <p>&copy; GoldixMedia Inc. 2011</p>
             </footer>
         </div>
-        </form>
     </body>
 </html>
 

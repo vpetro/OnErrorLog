@@ -6,12 +6,19 @@
             <td>No Applications Yet</td>
         </tr>
     {% else %}
-        {% for app in applications %}
+        {% for application in applications %}
         <tr>
-            <td><a href="/dashboard/{{ app['url_name'] }}" {% if current_application == str(app['_id']) %}class="selected"{% end %}>{{ app['application'] }} ({{ app['count'] }})</a></td>
+            <td><a href="/dashboard/{{ application['url_name'] }}" {% if current_application == str(application['_id']) %}class="selected"{% end %}>{{ application['application'] }} ({{ application['count'] }})</a></td>
         </tr>
         {% end %}
     {% end %}
 </table>
-<h3>Your API Key:</h3>
-<strong>{{ user['_id'] }}</strong>
+<div style="text-align: center;">
+    <h3>Your API Key:</h3>
+    <strong>{{ user['_id'] }}</strong>
+</div>
+
+<div style="padding: 30px 0 0 0; text-align: center;">
+    <input type="button" class="btn primary" value="Configure Application" id="configureBtn" />
+</div>
+

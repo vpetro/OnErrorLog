@@ -35,6 +35,11 @@ def insert_application(key, application):
 
     return app['_id']
 
+def save_application(app):
+    applications = Database.Instance().applications()
+
+    applications.save(app)
+
 def get_application_by_id(key, application_id):
     applications = Database.Instance().applications()
 

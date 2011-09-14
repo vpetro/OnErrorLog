@@ -1,0 +1,50 @@
+{% extends "base-sidebar.html" %}
+
+{% block script %}
+
+{% end %}
+
+{% block sideBar %}
+    {% include "sidebar.html" %}
+{% end %}
+
+{% block mainContent %}
+    <h2>GitHub Configuration</h2>
+    
+    <div class="span4" style="width: 450px;">
+    <form method="post" action="/configure/{{ app_name }}/save">
+        <fieldset>
+            <div class="clearfix">
+                <label for="company_name">Username/Organization:</label>
+                <div class="input">
+                    <input type="text" name="github_account" id="github_account" value="{% if "github_account" in app and app['github_account'] %}{{ app['github_account'] }}{% end %}"/>
+                </div>
+            </div>
+            <div class="clearfix">
+                <label for="username">Repository:</label>
+                <div class="input">
+                    <input type="text" name="github_repository" id="github_repository" value="{% if "github_repository" in app and app['github_repository'] %}{{ app['github_repository'] }}{% end %}" />
+                </div>
+            </div>
+        </fieldset>
+        If your github project is private, enter your username and token below.
+        <fieldset>
+            <div class="clearfix">
+                <label for="email">Username:</label>
+                <div class="input">
+                    <input type="text" name="github_username" id="github_username" value="{% if "github_username" in app and app['github_username'] %}{{ app['github_username'] }}{% end %}" />
+                </div>
+            </div>
+            <div class="clearfix">
+                <label for="password">Token:</label>
+                <div class="input">
+                    <input type="password" name="github_token" id="github_token" value="{% if "github_token" in app and app['github_token'] %}{{ app['github_token'] }}{% end %}" />
+                </div>
+            </div>
+            <div  style="margin-top: 20px; text-align: center;">
+                <button class="btn primary">Save</button>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% end %}
