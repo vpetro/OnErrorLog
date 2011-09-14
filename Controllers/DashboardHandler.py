@@ -226,7 +226,7 @@ class DetailsHandler(BaseDashboard):
                 url = self._find_github_url(sections, gh, app['github_account'], app['github_repository'], path=path, sha=sha)
 
                 if url:
-                    s['url'] = '%s#%s' % (url, s['line_number'])
+                    s['url'] = '%s#L%s' % (url, s['line_number'])
 
         self._data['exception_group'] = exception_group
         self._data['exceptions'] = exceptions
