@@ -21,18 +21,17 @@ class BaseDashboard(BaseHandler):
             if not app:
                 raise tornado.web.HTTPError(404)
             
-            self._data['current_application'] = app
+            self._data['current_application'] = str(app['_id'])
 
             return app
         else:
-            app = self.get_argument('app', None)
+            app = LoggingService.get_first_application(self._data['user']['_id'])
             if not app:
-                try:
-                    app = str(LoggingService.get_first_application(self._data['user']['_id'])['_id'])
-                except:
-                    return None
+                return None
 
-            self._data['current_application'] = app
+            self._data['current_application'] = str(app['_id'])
+
+            return app
 
     def _compute_paging(self, page, total_count):
         global ITEMS_PER_PAGE
@@ -87,13 +86,22 @@ class DashboardHandler(BaseDashboard):
         
         global ITEMS_PER_PAGE
 
+        app = self._global(app_name)
+
+        if app: app_name = app['url_name']
+        else: app_name = ''
+
+        #Check if the Archive All flag was passed
+        archive_all = self.get_argument('archive_all', None)
+        if archive_all == 'True':
+            LoggingService.archive_all_exception_group(app['_id'])
+            self.redirect('/dashboard/%s' % app_name)
+
         #Check if there are any exceptions to archive, if so
         exception = self.get_arguments('exception', None)
         if exception:
             for ex in exception:
-                LoggingService.archive_exceptiong_roup(ex)
-
-        app = self._global(app_name)
+                LoggingService.archive_exception_group(ex)
 
         #Get Severity
         severity = None
@@ -133,14 +141,19 @@ class DashboardHandler(BaseDashboard):
             self._data['exceptions'] = []
             total_count = 0
 
+        self._data['app_name'] = app_name
         if app:
             self._data['log_choice'] = log_choice
             self._data['severity'] = severity
             self._data['get_severity_string'] = LoggingService.get_severity_string
             self._data['keyword'] = keyword
+            self._data['total_count'] = total_count
+
             self._compute_paging(page, total_count)
         
+            
             self._data['section_title'] = 'Dashboard : %s : %s' % (self._data['user']['company_name'], app['application'])
+            self._data['application_name'] = app['application']
             self._data['htmlTitle'] = 'OnErrorLog - Dashboard'
             self.write(self.render_view('../Views/dashboard.html', self._data))
 
@@ -153,17 +166,16 @@ class DashboardHandler(BaseDashboard):
 
 class DetailsHandler(BaseDashboard):
     @tornado.web.authenticated
-    def get(self):
+    def get(self, app_name, unique_hash):
         
-        unique_hash = self.get_argument('id', None)
-
-        app = self._global()
+        app = self._global(app_name)
 
         exception_group = LoggingService.get_exception_group(unique_hash)
         exceptions = LoggingService.gex_exceptions_in_group(unique_hash)
 
         self._data['exception_group'] = exception_group
         self._data['exceptions'] = exceptions
+        self._data['app_name'] = app_name
 
         self._data['get_severity_string'] = LoggingService.get_severity_string
         self._data['section_title'] = '%s : %s' % (app['application'], self._data['exception_group']['message'][0:60])

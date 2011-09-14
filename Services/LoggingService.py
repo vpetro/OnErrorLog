@@ -106,7 +106,6 @@ def insert_exception(d):
     application_name = d['application']
     d['application'] = insert_application(d['key'], d['application'])
 
-
     if 'stacktrace' not in d:
         d['stacktrace'] = ''
 
@@ -184,13 +183,13 @@ def insert_exception(d):
     text = [d['message']]
     if 'headers' in d:
         for k, v in d['headers'].iteritems():
-            text.append(k)
-            text.append(v)
+            text.append(str(k))
+            text.append(str(v))
 
     if 'params' in d:
         for k, v in d['params'].iteritems():
-            text.append(k)
-            text.append(v)
+            text.append(str(k))
+            text.append(str(v))
     
     for s in d['stacktrace']:
         text.extend([str(x) for x in s.values()])
@@ -204,7 +203,6 @@ def insert_exception(d):
              }
 
     mdb_search.index_document(str(exception_group_id), ' '.join(text), ensureindex=kwargs.keys(), **kwargs)
-
 
     return exception_group_id, exception_id
 
@@ -240,7 +238,7 @@ def get_exception_group(exception_group_id):
     exception_groups = Database.Instance().exception_groups()
     return exception_groups.find_one({'_id': exception_group_id})
 
-def archive_exceptiong_roup(unique_hash):
+def archive_exception_group(unique_hash):
     group = get_exception_group(unique_hash)
 
     if not group: return
@@ -254,6 +252,32 @@ def archive_exceptiong_roup(unique_hash):
 
     exception_groups = Database.Instance().exception_groups()
     exception_groups.save(group)
+
+def archive_all_exception_group(application_id):
+
+    exception_groups = Database.Instance().exception_groups()
+
+    if type(application_id) == type(u'') or type(application_id) == type(''):
+        application_id = ObjectId(application_id)
+
+    print exception_groups.find({
+                            'application': application_id, 
+                            'status': False 
+                            }).count()
+
+
+    exception_groups.update({
+                            'application': application_id, 
+                            'status': False 
+                            }, 
+                            {'$set': {'status': True}}, multi=True)
+
+    applications = Database.Instance().applications()
+    
+    application = applications.find_one({'_id': application_id })
+    application['count'] = 0
+    applications.save(application)
+
 
 def gex_exceptions_in_group(exception_group_id, start=0, maxrecs=10):
     if type(exception_group_id) == type(u'') or type(exception_group_id) == type(''):

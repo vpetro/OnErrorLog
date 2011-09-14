@@ -32,6 +32,22 @@
             toggleArchiveButton();
         });
 
+        $('#archiveAllBtn').click(function() {
+            
+            {% if total_count == 0 %}
+                return false;
+            {% else %}
+                c = confirm('Are you certain you wish to archive all messages from this {{ application_name }} application?');
+                if (!c)
+                {
+                    return false;
+                }
+                
+                $('#archive_all').val('True');
+
+            {% end %}
+        });
+
     });
 
     function toggleArchiveButton(){
@@ -61,6 +77,9 @@
         $('#select_all')[0].checked = false;
     }
 
+
+    
+
 </script>
     
 {% end %}
@@ -83,7 +102,7 @@
     &nbsp;
     &nbsp;
     <button type="submit" class="btn">Refresh Log</button>
-    <input type="hidden" name="app" value="{{ current_application }}" />
+    <input type="hidden" name="archive_all" id="archive_all" value="False" />
 </div>
 
 
@@ -100,7 +119,7 @@
         </tr>
     </thead>
     <tbody>
-        {% if exceptions.count() == 0 %}
+        {% if total_count == 0 %}
             <tr>
                 <td colspan="6" style="text-align: center; padding: 20px;">
                     <strong>No log entries found.</strong>
@@ -115,7 +134,7 @@
                     {% end %}
                 </td>
                 <td>{{ pretty_date(exception['last_seen_on']) }}</td>
-                <td><a href="details?id={{ exception['_id'] }}&app={{ exception['application'] }}">
+                <td><a href="/{{ app_name }}/details/{{ exception['_id'] }}">
                         {% if len(exception['message']) == 0 %}
                             .:: NO MESSAGE ::.
                         {% else %}
@@ -133,6 +152,7 @@
 
 <div style="padding: 18px 0px 23px 0px; float: left;">
     <input type="submit" class="btn primary disabled" value="Archive" id="archiveBtn" />
+    <input type="submit" class="btn primary{% if total_count == 0 %} disabled{% end %}" value="Archive All" id="archiveAllBtn" />
 </div>
 
 {% include "paging.html" %}

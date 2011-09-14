@@ -36,7 +36,7 @@ if __name__ == '__main__':
         
         #General Functionality
         (r'/dashboard(/.*)?', DashboardHandler),
-        (r'/details', DetailsHandler),
+        (r'(/.*)/details/(.*)', DetailsHandler),
         (r'/about', AboutHandler),
         (r'/docs', DocsHandler),
 

@@ -20,6 +20,7 @@ class AddExceptionHandler(BaseHandler):
             elif str(e) == 'Severity has an invalid value':
                 self.set_error_json(str(e), 400)
         except Exception, e:
+            print str(e)
             self.set_error_json(str(e), 500)
 
 

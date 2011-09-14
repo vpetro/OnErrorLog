@@ -72,7 +72,7 @@
                 {% if 'params' in ex %}
                     {% for k, v in ex['params'].iteritems() %}
                         <div style="padding-top: 5px;">
-                            <strong>{{ k }}</strong>: {{ v[0:80] }}
+                            <strong>{{ k }}</strong>: {{ str(v) }}
                         </div>
                     {% end %}
                 {% else %}

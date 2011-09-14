@@ -15,18 +15,20 @@
     </head>
     
     <body>
-        <form action="/dashboard" method="get">
+        <form action="/dashboard/{{ app_name }}" method="get">
         {% include "top-menu.html" %}
         
         <div class="container-fluid">
             
             <div class="sidebar" style="margin-top: 60px;">
+                {% if app_name %}
                 <h3>Search</h3>
                 <fieldset>
                     <div class="clearfix">
                         <input type="text" name="keyword" id="keywowrd" value="{{ keyword }}" />
                     </div>
                 </fieldset>
+                {% end %}
                 {% block sideBar %}{% end %}
             </div>
             <div class="content"  style="margin-top: 60px; min-height: 500px;">
