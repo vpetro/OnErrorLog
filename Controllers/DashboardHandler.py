@@ -206,7 +206,7 @@ class DetailsHandler(BaseDashboard):
         app, app_name = self._global(app_name)
 
         import cgi
-        from Packages.github import github
+        from github import github
         gh = None
         if 'github_account' in app and app['github_account'] and 'github_repository' in app and app['github_repository']:
             if 'github_token' in app and app['github_token'] and 'github_username' in app and app['github_username']:
@@ -226,7 +226,7 @@ class DetailsHandler(BaseDashboard):
                 url = self._find_github_url(sections, gh, app['github_account'], app['github_repository'], path=path, sha=sha)
 
                 if url:
-                    s['url'] = url
+                    s['url'] = '%s#%s' % (url, s['line_number'])
 
         self._data['exception_group'] = exception_group
         self._data['exceptions'] = exceptions
