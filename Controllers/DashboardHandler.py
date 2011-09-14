@@ -33,7 +33,7 @@ class BaseDashboard(BaseHandler):
 
             return app
 
-    def _compute_paging(self, page, total_count):
+    def _compute_paging(self, page, total_count, app_name):
         global ITEMS_PER_PAGE
 
         start_page = 1
@@ -75,7 +75,7 @@ class BaseDashboard(BaseHandler):
         self._data['page'] = page
         self._data['start_page'] = start_page
         self._data['max_pages'] = max_pages
-        self._data['page_link'] = '/dashboard?%s&page=' % re.sub('&?page=\d+', '', self.request.query)
+        self._data['page_link'] = '/dashboard/%s?%s&page=' % (app_name, re.sub('&?page=\d+', '', self.request.query))
         self._data['page_status'] = page_status
         self._data['next_page'] = next_page
         self._data['previous_page'] = previous_page
@@ -133,8 +133,12 @@ class DashboardHandler(BaseDashboard):
             if severity is not None:
                 conditions['severity'] = severity
 
-            documents, _, total_count = mongo_search.search(keyword, conditions=conditions, fields=['unique_hash, _id'])
-
+            documents, _, total_count = mongo_search.search(keyword, 
+                                                            conditions=conditions, 
+                                                            fields=['unique_hash, _id'], 
+                                                            start=start,
+                                                            scoring=('last_save_date', -1))
+            
             for doc in documents:
                 self._data['exceptions'].append(LoggingService.get_exception_group(doc['_id']))
         else:
@@ -149,7 +153,7 @@ class DashboardHandler(BaseDashboard):
             self._data['keyword'] = keyword
             self._data['total_count'] = total_count
 
-            self._compute_paging(page, total_count)
+            self._compute_paging(page, total_count, app_name)
         
             
             self._data['section_title'] = 'Dashboard : %s : %s' % (self._data['user']['company_name'], app['application'])
