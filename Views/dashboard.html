@@ -114,6 +114,7 @@
         <tr>
         <th style="width: 1%"><input type="checkbox" id="select_all" /></th>
         <th>Last Seen On</th>
+        <th>&nbsp;</th>
         <th>Message</th>
         <th>File</th>
         <th>Severity</th>
@@ -136,8 +137,16 @@
                     {% end %}
                 </td>
                 <td>{{ pretty_date(exception['last_seen_on']) }}</td>
+                <td>
+                    {% if "lighthouse_url" in exception and exception['lighthouse_url'] %}
+                        <a href="{{ exception['lighthouse_url'] }}" target="_blank">
+                            <img src="/images/lighthouse.jpeg" border="0" />
+                        </a>
+                    {% end %}
+                </td>
+
                 <td><a href="/{{ app_name }}/details/{{ exception['_id'] }}">
-                        {% if len(exception['message']) == 0 %}
+                        {% if len(exception['message'].strip()) == 0 %}
                             .:: NO MESSAGE ::.
                         {% else %}
                             {{ exception['message'] }}
