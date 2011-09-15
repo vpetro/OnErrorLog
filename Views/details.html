@@ -1,7 +1,16 @@
 {% extends "base-sidebar.html" %}
 
-{% block script %}
+{% block scripts %}
+    <script type="text/javascript">
 
+    $(document).ready(function() {
+        $('#createLighthouseBtn').click(function() {
+            location.href = '/{{ app_name }}/lighthouse/{{ unique_hash }}';
+        });
+           
+
+    });
+    </script>
 {% end %}
 
 {% block sideBar %}
@@ -26,6 +35,16 @@
         <td>{{ pretty_date(exception_group['last_seen_on']) }}</td>
     </tr>
 </table>
+
+{% if 'lighthouse_project_id' in app and app['lighthouse_project_id'] and 'lighthouse_apitoken' in app and app['lighthouse_apitoken'] %}
+    <h3>Lighthouse Ticket</h3>
+
+    {% if "lighthouse_url" not in exception_group %}
+        <input type="button" class="btn primary" value="Create Lighthouse Ticket" id="createLighthouseBtn" />
+    {% else %}
+        <button class="btn success" onclick="location.href = '{{ exception_group['lighthouse_url'] }}';">View Lighthouse Ticket</button>
+    {% end %}
+{% end %}
 
 <h3>Stacktrace</h3>
 <div class="span16">

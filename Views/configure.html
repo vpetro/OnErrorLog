@@ -9,9 +9,11 @@
 {% end %}
 
 {% block mainContent %}
-    <h2>GitHub Configuration</h2>
+    
     
     <div class="span4" style="width: 450px;">
+    <h2>GitHub Configuration</h2>
+
     <form method="post" action="/configure/{{ app_name }}/save">
         <fieldset>
             <div class="clearfix">
@@ -38,7 +40,23 @@
             <div class="clearfix">
                 <label for="password">Token:</label>
                 <div class="input">
-                    <input type="password" name="github_token" id="github_token" value="{% if "github_token" in app and app['github_token'] %}{{ app['github_token'] }}{% end %}" />
+                    <input type="text" name="github_token" id="github_token" value="{% if "github_token" in app and app['github_token'] %}{{ app['github_token'] }}{% end %}" />
+                </div>
+            </div>
+        </fieldset>
+
+        <h2>Lighthouse Configuration</h2>
+        <fieldset>
+            <div class="clearfix">
+                <label for="company_name">API Token:</label>
+                <div class="input">
+                    <input type="text" name="lighthouse_apitoken" id="lighthouse_apitoken" value="{% if "lighthouse_apitoken" in app and app['lighthouse_apitoken'] %}{{ app['lighthouse_apitoken'] }}{% end %}"/>
+                </div>
+            </div>
+            <div class="clearfix">
+                <label for="username">Project Id:</label>
+                <div class="input">
+                    <input type="text" name="lighthouse_project_id" id="lighthouse_project_id" value="{% if "lighthouse_project_id" in app and app['lighthouse_project_id'] %}{{ app['lighthouse_project_id'] }}{% end %}" />
                 </div>
             </div>
             <div  style="margin-top: 20px; text-align: center;">

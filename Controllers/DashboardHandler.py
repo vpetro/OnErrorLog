@@ -3,6 +3,8 @@ import tornado.web
 import re
 from Controllers.BaseHandler import BaseHandler
 from Services import LoggingService
+from Services import LighthouseService
+from Services import Database
 
 ITEMS_PER_PAGE = 20
 
@@ -29,6 +31,9 @@ class BaseDashboard(BaseHandler):
 
         if app: app_name = app['url_name']
         else: app_name = ''
+
+        self._data['app'] = app
+        self._data['app_name'] = app_name
 
         return app, app_name
 
@@ -141,7 +146,6 @@ class DashboardHandler(BaseDashboard):
             self._data['exceptions'] = []
             total_count = 0
 
-        self._data['app_name'] = app_name
         if app:
             self._data['log_choice'] = log_choice
             self._data['severity'] = severity
@@ -230,7 +234,8 @@ class DetailsHandler(BaseDashboard):
 
         self._data['exception_group'] = exception_group
         self._data['exceptions'] = exceptions
-        self._data['app_name'] = app_name
+        self._data['unique_hash'] = unique_hash
+        
 
         self._data['get_severity_string'] = LoggingService.get_severity_string
         self._data['section_title'] = '%s : %s' % (app['application'], self._data['exception_group']['message'][0:60])
@@ -249,6 +254,8 @@ class ConfigureSaveHandler(BaseDashboard):
         app['github_repository'] = self.get_argument('github_repository', None)
         app['github_username'] = self.get_argument('github_username', None)
         app['github_token'] = self.get_argument('github_token', None)
+        app['lighthouse_apitoken'] = self.get_argument('lighthouse_apitoken', None)
+        app['lighthouse_project_id'] = self.get_argument('lighthouse_project_id', None)
 
         LoggingService.save_application(app)
 
@@ -259,10 +266,48 @@ class ConfigureHandler(BaseDashboard):
         app, app_name = self._global(app_name)
         
         self._data['section_title'] = 'Configure : %s : %s' % (self._data['user']['company_name'], app['application'])
-        self._data['app_name'] = app_name
         self._data['htmlTitle'] = 'OnErrorLog - Configuration'
 
         self._data['app'] = app
         self.write(self.render_view('../Views/configure.html', self._data))
 
+class LighthouseHandler(BaseDashboard):
+    def get(self, app_name, unique_hash):
+        import cgi
 
+        app, app_name = self._global(app_name)
+
+        exception_group = LoggingService.get_exception_group(unique_hash)
+
+        lh_memberships = LighthouseService.get_project_memberships(app['lighthouse_project_id'])
+
+        members = []
+        for member in lh_memberships:
+            members.append({'name': member['membership']['user']['name'], 'id': member['membership']['user']['id'] })
+
+        self._data['exception_group'] = exception_group
+        self._data['unique_hash'] = unique_hash
+        self._data['htmlTitle'] = 'OnErrorLog - Create Lighthouse Ticket'
+        self._data['section_title'] = '%s : %s' % (app['application'], self._data['exception_group']['message'][0:60])
+        self._data['cgi'] = cgi
+        self._data['members'] = members
+
+        self.write(self.render_view('../Views/lighthouse.html', self._data))
+
+class LighthouseCreateHandler(BaseDashboard):
+    def post(self, app_name, unique_hash):
+        lighthouse_title = self.get_argument('lighthouse_title', None)
+        lighthouse_member = self.get_argument('lighthouse_member', None)
+        lighthouse_body = self.get_argument('lighthouse_body', None)
+
+        app, app_name = self._global(app_name)
+
+        ticket_url = LighthouseService.create_ticket(app['lighthouse_project_id'], lighthouse_title, lighthouse_body, user_id=lighthouse_member)
+        
+        exception_group = LoggingService.get_exception_group(unique_hash)
+        
+        exception_groups = Database.Instance().exception_groups()
+        exception_group['lighthouse_url'] = ticket_url
+        exception_groups.save(exception_group)
+
+        self.redirect('/%s/details/%s' % (app_name, unique_hash))

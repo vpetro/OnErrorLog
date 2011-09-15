@@ -1,0 +1,83 @@
+{% extends "base-sidebar.html" %}
+
+{% block scripts %}
+    <script type="text/javascript">
+
+    $(document).ready(function() {
+        $('#createLighthouseBtn').click(function() {
+            if ($('#lighthouse_title').val().length == 0 || $('#lighthouse_body').val().length == 0)
+            {
+                $('#alert_fields').show();
+                return false;
+            }
+        });
+           
+
+    });
+    </script>
+{% end %}
+
+{% block sideBar %}
+    {% include "sidebar.html" %}
+{% end %}
+
+{% block mainContent %}
+    
+    
+    <div class="span4" style="width: 450px;">
+    <h2>Create Lighthouse Ticket</h2>
+
+    <form method="post" action="/{{ app_name }}/lighthouse/create/{{ unique_hash }}">
+        <fieldset>
+            <div class="clearfix" id="alert_fields" style="display: none;">
+                <label for="nothing">&nbsp;</label>
+                <div class="input">
+                    <div class="alert-message error" style="width: 100%; padding-left: 5px; text-align: center;">
+                        <p><strong>Doh!</strong> All fields are required!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix">
+                <label for="lighthouse_title">Title:</label>
+                <div class="input">
+                    <input type="text" name="lighthouse_title" id="lighthouse_title" style="width: 600px;" value="{{ exception_group['message'] }} - {{ exception_group['filename'] }}"/>
+                </div>
+            </div>
+            <div class="clearfix">
+                <label for="lighthouse_member">Assigned To:</label>
+                <div class="input">
+                    <select name="lighthouse_member" id="lighthouse_member">
+                        {% for member in members %}
+                            <option value="{{ member['id'] }}">{{ member['name'] }}</option>
+                        {% end %}
+                    </select>
+                </div>
+            </div>
+            <div class="clearfix">
+                <label for="lighthouse_body">Body:</label>
+                <div class="input">
+                    <textarea name="lighthouse_body" id="lighthouse_body" style="width: 600px; height: 300px;">
+                        Details: http://www.onerrorlog.com/{{ app_name }}/details/{{ unique_hash }}
+                        Message: {{ exception_group['message'] }}
+                        Filename: {{ exception_group['filename'] }}
+                        Stacktrace:
+                        {% if exception_group['stacktrace'] %}{% for s in exception_group['stacktrace'] %}
+                                File "{% if 'url' in s %}<a href="{{ s['url'] }}" target="_blank">{% end %}{{ s['filename'] }}{% if 'url' in s %}</a>{% end %}", line {{ s['line_number'] }}, in {{ s['function_name'] }}
+                                &nbsp;&nbsp;&nbsp; {{ cgi.escape(s['method']) }}
+                        {% end %}{% else %}Not Available{% end %}
+                    </textarea>
+                </div>
+            </div>
+            <div class="clearfix">
+                <label for="email">&nbsp;</label>
+                <div class="input">
+                    <div  style="margin-top: 20px; text-align: center;">
+                      <button class="btn primary" id="createLighthouseBtn">Create Lighthouse Ticket</button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% end %}
+

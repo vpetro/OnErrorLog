@@ -89,8 +89,9 @@
 {% end %}
 
 {% block mainContent %}
+<form action="/dashboard/{{ app_name }}" method="get">
+
 <div class="span16 columns" style="background-color: #f5f5f5; padding: 5px 10px 5px 10px">
-    <form action="/dashboard/{{ app_name }}" method="get">
         <input type="radio" name="log_choice" id="all" value="all" {% if log_choice == 'all' %}checked="checked"{% end %} /> All Requests
         &nbsp;&nbsp;
         <input type="radio" name="log_choice" id="specific" value="specific" {% if not log_choice or log_choice == 'specific' %}checked=checked{% end %} /> Logs with this specific severity level
@@ -104,7 +105,6 @@
         &nbsp;
         <button type="submit" class="btn">Refresh Log</button>
         <input type="hidden" name="archive_all" id="archive_all" value="False" />
-    </form>
 </div>
 
 
@@ -156,6 +156,7 @@
     <input type="submit" class="btn primary disabled" value="Archive" id="archiveBtn" />
     <input type="submit" class="btn primary{% if total_count == 0 %} disabled{% end %}" value="Archive All" id="archiveAllBtn" />
 </div>
+</form>
 
 {% include "paging.html" %}
 
