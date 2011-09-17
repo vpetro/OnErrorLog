@@ -1,10 +1,8 @@
-from pymongo import Connection
-from pymongo.objectid import ObjectId
 from Packages.mongodbsearch import mongodbsearch
 from Services import Database
 import datetime
-import re
-from unidecode import unidecode
+from Services import ServicesTools
+from Services import ApplicationService
 
 SEVERITY_CRITICAL = 0
 SEVERITY_ERROR = 1
@@ -12,68 +10,15 @@ SEVERITY_INFO = 2
 SEVERITY_DEBUG = 3
 
 def _validate_key(key):
+
+    key = ServicesTools.convert_to_object_id(key)
     accounts = Database.Instance().accounts()
-    account = accounts.find_one({'_id': ObjectId(key) })
+    account = accounts.find_one({'_id': key })
 
     if not account: return False
 
     return True
 
-def insert_application(key, application):
-    applications = Database.Instance().applications()
-
-    d = {'key': key, 
-         'application': application,
-         'url_name': normalize_text_for_url(application) 
-        }
-
-    app = applications.find_one(d)
-
-    if not app:
-        d['count'] = 1
-        return applications.save(d)
-
-    return app['_id']
-
-def save_application(app):
-    applications = Database.Instance().applications()
-
-    applications.save(app)
-
-def get_application_by_id(key, application_id):
-    applications = Database.Instance().applications()
-
-    if type(application_id) == type(u'') or type(application_id) == type(''):
-        application_id = ObjectId(application_id)
-
-    d = {'key': key, '_id': application_id }
-    app = applications.find_one(d)
-
-    if not app:
-        return None
-
-    return app
-
-def get_application_by_url_name(key, url_name):
-    applications = Database.Instance().applications()
-
-    d = {'key': key, 'url_name': url_name }
-    app = applications.find_one(d)
-
-    if not app:
-        return None
-
-    return app
-
-def get_applications(key):
-    applications = Database.Instance().applications()
-
-    return applications.find({'key': key })
-
-def get_first_application(key):
-    applications = Database.Instance().applications()
-
-    return applications.find_one({'key': key })
 
 def get_severity_string(severity):
     severity = int(severity)
@@ -108,8 +53,7 @@ def insert_exception(d):
     if not _validate_key(d['key']):
         raise KeyError('The key you specified is invalid')
 
-    application_name = d['application']
-    d['application'] = insert_application(d['key'], d['application'])
+    d['application'] = ApplicationService.insert_application(d['key'], d['application'])
 
     if 'stacktrace' not in d:
         d['stacktrace'] = ''
@@ -136,12 +80,14 @@ def insert_exception(d):
    
     #If Exception already exists, increment count
     if group:
+        print 'a'
         group['count'] += 1
         group['exceptions'].append(exception_id)
         group['status'] = False
 
     #Otherwise, create the exception group record
     else:
+        print 'b'
         group = { 'message': d['message'],
                   'severity': d['severity'],
                   'key': d['key'],
@@ -155,7 +101,11 @@ def insert_exception(d):
                   'stacktrace': d['stacktrace'],
                 }
 
-        applications.update({'_id': d['application'] }, {'$inc': {'count': 1 } })
+        print 'severity => %s' % str(d['severity'])
+
+        applications.update({'_id': d['application'] }, {'$inc': {'count': 1 }})
+        applications.update({'_id': d['application'] }, {'$inc': {str(d['severity']): 1 }})
+    
 
     #Set the last seen_date
     group['last_seen_on'] = datetime.datetime.utcnow()
@@ -215,8 +165,7 @@ def get_exceptions_groups(key, application, severity=None, status=False, start=0
 
     exception_groups = Database.Instance().exception_groups()
 
-    if type(application) == type(u''):
-        application = ObjectId(application)
+    application = ServicesTools.convert_to_object_id(application)
 
     query = {'key': key,
              'application': application,
@@ -237,8 +186,8 @@ def get_exceptions_groups(key, application, severity=None, status=False, start=0
     return group_exceptions
 
 def get_exception_group(exception_group_id):
-    if type(exception_group_id) == type(u'') or type(exception_group_id) == type(''):
-        exception_group_id = ObjectId(exception_group_id)
+
+    exception_group_id = ServicesTools.convert_to_object_id(exception_group_id)
 
     exception_groups = Database.Instance().exception_groups()
     return exception_groups.find_one({'_id': exception_group_id})
@@ -261,14 +210,8 @@ def archive_exception_group(unique_hash):
 def archive_all_exception_group(application_id):
 
     exception_groups = Database.Instance().exception_groups()
-
-    if type(application_id) == type(u'') or type(application_id) == type(''):
-        application_id = ObjectId(application_id)
-
-    print exception_groups.find({
-                            'application': application_id, 
-                            'status': False 
-                            }).count()
+    
+    application_id = ServicesTools.convert_to_object_id(application_id)
 
 
     exception_groups.update({
@@ -281,74 +224,19 @@ def archive_all_exception_group(application_id):
     
     application = applications.find_one({'_id': application_id })
     application['count'] = 0
+    application['0'] = 0
+    application['1'] = 0
+    application['2'] = 0
+    application['3'] = 0
     applications.save(application)
 
 
 def gex_exceptions_in_group(exception_group_id, start=0, maxrecs=10):
-    if type(exception_group_id) == type(u'') or type(exception_group_id) == type(''):
-        exception_group_id = ObjectId(exception_group_id)
+
+    exception_group_id = ServicesTools.convert_to_object_id(exception_group_id)
 
     exceptions = Database.Instance().exceptions()
     return exceptions.find({'exception_group_id': exception_group_id}).skip(start).limit(maxrecs).sort('insert_date', -1)
 
-def normalize_text_for_url(text):
-    
-    text = decode_title(text)
-    text = left_spaces(text, 400)
-    
-    #make works like don't can't or dominic's to dont cant dominics
-    matches = re.findall(r"[a-z]'[a-z]", text)
-    for match in matches:
-        text = text.replace(match, match.replace("'", ""))
-        
-    #make terms like 1080 x 768 to 1080x768
-    matches = re.findall(r"\b[0-9]+\sx\s[0-9]+\b", text)
-    for match in matches:
-        text = text.replace(match, match.replace(" ", ""))
-    
-    
-    text = re.sub(r'[^a-zA-Z0-9\.\-_]', '-', text.lower().strip())
-   
-    doubleFind = text.find('--')
-    while doubleFind <> -1:
-        text = text.replace('--', '-')
-        doubleFind = text.find('--')
-    
-    if text.startswith('-'): text= text[1:]
-    if text.endswith('-'): text = text[0:-1]
-    
-    return text
 
-def decode_title(title):
-    import unidecode
-    title = title.replace('&amp;', '&')
-    return unidecode.unidecode(title)
-
-def left_spaces(text, length):
-    if length > 0 and len(text) > length:
-        m = re.split(r'\s', text)
-
-        if m[0] == text:
-            return text[:length]
-        
-        str = ''
-        for g in m:
-            if len(str + g) > length:
-                return str[1:]
-            else:
-                str = str + ' ' + g;
-        
-    return text
-
-
-if __name__ == '__main__':
-
-    from pymongo import Connection
-
-    db = Connection()['onerrorlog']
-    apps = db['applications'].find()
-
-    for app in apps:
-        app['url_name'] = normalize_text_for_url(app['application'])
-        db['applications'].save(app)
 

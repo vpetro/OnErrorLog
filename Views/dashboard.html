@@ -8,6 +8,7 @@
         $('#severity_level').change(function() {
             $('#all')[0].checked = false;
             $('#specific')[0].checked = true;
+            $('#refreshFrm').submit();
         });
 
         $('#select_all').change(function() {
@@ -89,17 +90,18 @@
 {% end %}
 
 {% block mainContent %}
-<form action="/dashboard/{{ app_name }}" method="get">
+<form action="/dashboard/{{ app_name }}" method="get" id="refreshFrm">
+
 
 <div class="span16 columns" style="background-color: #f5f5f5; padding: 5px 10px 5px 10px">
         <input type="radio" name="log_choice" id="all" value="all" {% if log_choice == 'all' %}checked="checked"{% end %} /> All Requests
         &nbsp;&nbsp;
         <input type="radio" name="log_choice" id="specific" value="specific" {% if not log_choice or log_choice == 'specific' %}checked=checked{% end %} /> Logs with this specific severity level
         <select name="severity_level" id="severity_level" class="medium">
-            <option value="3" {% if severity == 3 %}selected="selected"{% end %}>Debug</option>
-            <option value="2" {% if severity == 2 %}selected="selected"{% end %}>Info</option>
-            <option value="1" {% if severity == 1 %}selected="selected"{% end %}>Error</option>
-            <option value="0" {% if severity == 0 %}selected="selected"{% end %}>Critical</option>
+            <option value="3" {% if severity == 3 %}selected="selected"{% end %}>Debug ({% if '3' in app %}{{ app['3'] }}{% else %}0{% end %})</option>
+            <option value="2" {% if severity == 2 %}selected="selected"{% end %}>Info ({% if '2' in app %}{{ app['2'] }}{% else %}0{% end %})</option>
+            <option value="1" {% if severity == 1 %}selected="selected"{% end %}>Error ({% if '1' in app %}{{ app['1'] }}{% else %}0{% end %})</option>
+            <option value="0" {% if severity == 0 %}selected="selected"{% end %}>Critical ({% if '1' in app %}{{ app['0'] }}{% else %}0{% end %})</option>
         </select>
         &nbsp;
         &nbsp;
@@ -124,7 +126,7 @@
     <tbody>
         {% if total_count == 0 %}
             <tr>
-                <td colspan="6" style="text-align: center; padding: 20px;">
+                <td colspan="7" style="text-align: center; padding: 20px;">
                     <strong>No log entries found.</strong>
                 </td>
             </tr>

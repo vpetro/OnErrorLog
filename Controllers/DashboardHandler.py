@@ -3,6 +3,7 @@ import tornado.web
 import re
 from Controllers.BaseHandler import BaseHandler
 from Services import LoggingService
+from Services import ApplicationService
 from Services import LighthouseService
 from Services import Database
 
@@ -11,14 +12,14 @@ ITEMS_PER_PAGE = 20
 class BaseDashboard(BaseHandler):
 
     def _global(self, app_name):
-        self._data['applications'] = LoggingService.get_applications(self._data['user']['_id'])
+        self._data['applications'] = ApplicationService.get_applications(self._data['user']['_id'])
         self._data['keyword'] = ''
 
         #Get Applications
         if app_name:
 
             app_name = app_name.replace('/', '')
-            app = LoggingService.get_application_by_url_name(self._data['user']['_id'], app_name)
+            app = ApplicationService.get_application_by_url_name(self._data['user']['_id'], app_name)
             
             if not app:
                 raise tornado.web.HTTPError(404)
@@ -26,7 +27,7 @@ class BaseDashboard(BaseHandler):
             self._data['current_application'] = str(app['_id'])
 
         else:
-            app = LoggingService.get_first_application(self._data['user']['_id'])
+            app = ApplicationService.get_first_application(self._data['user']['_id'])
             self._data['current_application'] = str(app['_id'])
 
         if app: app_name = app['url_name']
@@ -257,7 +258,7 @@ class ConfigureSaveHandler(BaseDashboard):
         app['lighthouse_apitoken'] = self.get_argument('lighthouse_apitoken', None)
         app['lighthouse_project_id'] = self.get_argument('lighthouse_project_id', None)
 
-        LoggingService.save_application(app)
+        ApplicationService.save_application(app)
 
         self.redirect('/configure/%s' % app_name)
 
