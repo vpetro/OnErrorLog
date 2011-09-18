@@ -19,6 +19,9 @@ class Instance:
         def accounts(self):
             return Connection(config.MONGODB_HOST, config.MONGODB_PORT)[config.MONGODB_NAME]['accounts']
 
+        def statistics(self):
+            return Connection(config.MONGODB_HOST, config.MONGODB_PORT)[config.MONGODB_NAME]['statistics']
+
         def db(self):
             return Connection(config.MONGODB_HOST, config.MONGODB_PORT)[config.MONGODB_NAME]
 

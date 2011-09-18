@@ -80,14 +80,12 @@ def insert_exception(d):
    
     #If Exception already exists, increment count
     if group:
-        print 'a'
         group['count'] += 1
         group['exceptions'].append(exception_id)
         group['status'] = False
 
     #Otherwise, create the exception group record
     else:
-        print 'b'
         group = { 'message': d['message'],
                   'severity': d['severity'],
                   'key': d['key'],
@@ -101,17 +99,17 @@ def insert_exception(d):
                   'stacktrace': d['stacktrace'],
                 }
 
-        print 'severity => %s' % str(d['severity'])
 
         applications.update({'_id': d['application'] }, {'$inc': {'count': 1 }})
         applications.update({'_id': d['application'] }, {'$inc': {str(d['severity']): 1 }})
     
-
     #Set the last seen_date
     group['last_seen_on'] = datetime.datetime.utcnow()
 
     #Save the exception group
     exception_group_id = exception_groups.save(group)
+
+    increment_statistics(d)
 
     #Update the Exception with the Exception Group Id
     exception['exception_group_id'] = exception_group_id
@@ -160,6 +158,21 @@ def insert_exception(d):
     mdb_search.index_document(str(exception_group_id), ' '.join(text), ensureindex=kwargs.keys(), **kwargs)
 
     return exception_group_id, exception_id
+
+def increment_statistics(d):
+    #Increment Statistics
+    key_date = datetime.datetime.utcnow()
+    key_date = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.hour)
+    
+    key = '%s-%s-%s-%s' % (d['key'], d['severity'], datetime.datetime.strftime(key_date, "%Y%m%d%H"), str(d['application']))
+    statistics = Database.Instance().statistics()
+    statistics.update({'_id': key, 'key': d['key'], 'severity': d['severity'], 'date': key_date, 'application_id': d['application']}, {'$inc': {'count': 1} }, upsert=True)
+
+    key = '%s-%s-%s-%s' % (d['key'], d['severity'], datetime.datetime.strftime(key_date, "%Y%m%d%H"), d['filename'])
+    statistics = Database.Instance().statistics()
+    statistics.update({'_id': key, 'key': d['key'], 'severity': d['severity'], 'date': key_date, 'filename': d['filename']}, {'$inc': {'count': 1} }, upsert=True)
+    
+    statistics.ensure_index([('key', 1), ('severity', 1), ('date', 1 ), ('application_id', 1), ('filename', 1)])
 
 def get_exceptions_groups(key, application, severity=None, status=False, start=0, maxrecs=20, since=None):
 

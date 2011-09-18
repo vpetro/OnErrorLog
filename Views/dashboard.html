@@ -101,7 +101,7 @@
             <option value="3" {% if severity == 3 %}selected="selected"{% end %}>Debug ({% if '3' in app %}{{ app['3'] }}{% else %}0{% end %})</option>
             <option value="2" {% if severity == 2 %}selected="selected"{% end %}>Info ({% if '2' in app %}{{ app['2'] }}{% else %}0{% end %})</option>
             <option value="1" {% if severity == 1 %}selected="selected"{% end %}>Error ({% if '1' in app %}{{ app['1'] }}{% else %}0{% end %})</option>
-            <option value="0" {% if severity == 0 %}selected="selected"{% end %}>Critical ({% if '1' in app %}{{ app['0'] }}{% else %}0{% end %})</option>
+            <option value="0" {% if severity == 0 %}selected="selected"{% end %}>Critical ({% if '0' in app %}{{ app['0'] }}{% else %}0{% end %})</option>
         </select>
         &nbsp;
         &nbsp;
