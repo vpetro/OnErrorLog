@@ -118,8 +118,28 @@ class DashboardHandler(BaseDashboard):
         #Get Exceptions
         keyword = self.get_argument('keyword', '')
 
+        #Sorting Variables
+        sort = self.get_argument('sort', 'last_seen_on')
+        sort_direction = int(self.get_argument('sort_direction', -1))
+
+        lso_new_sort = -1
+        cnt_new_sort = -1
+
+        if sort == 'last_seen_on':
+            if sort_direction == -1:
+                lso_new_sort = 1
+        else:
+            if sort_direction == -1:
+                cnt_new_sort = 1
+
         if not keyword and app:
-            self._data['exceptions'] = LoggingService.get_exceptions_groups(self._data['user']['_id'], app['_id'], severity=severity, start=start)
+            self._data['exceptions'] = LoggingService.get_exceptions_groups(
+                                    self._data['user']['_id'], 
+                                    app['_id'], severity=severity, 
+                                    start=start, 
+                                    sort=sort, 
+                                    sort_direction=sort_direction)
+
             total_count = self._data['exceptions'].count()
         elif keyword:
             from Packages.mongodbsearch import mongodbsearch
@@ -148,11 +168,17 @@ class DashboardHandler(BaseDashboard):
             total_count = 0
 
         if app:
+
+            LoggingService.get_statistics_for_application(app['_id'])
+
             self._data['log_choice'] = log_choice
             self._data['severity'] = severity
             self._data['get_severity_string'] = LoggingService.get_severity_string
             self._data['keyword'] = keyword
             self._data['total_count'] = total_count
+            self._data['lso_new_sort'] = lso_new_sort
+            self._data['cnt_new_sort'] = cnt_new_sort
+
 
             self._compute_paging(page, total_count, app_name)
         

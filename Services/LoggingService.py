@@ -1,6 +1,7 @@
 from Packages.mongodbsearch import mongodbsearch
 from Services import Database
 import datetime
+from datetime import timedelta
 from Services import ServicesTools
 from Services import ApplicationService
 
@@ -163,18 +164,50 @@ def increment_statistics(d):
     #Increment Statistics
     key_date = datetime.datetime.utcnow()
     key_date = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.hour)
+
+    statistics = Database.Instance().statistics()
     
     key = '%s-%s-%s-%s' % (d['key'], d['severity'], datetime.datetime.strftime(key_date, "%Y%m%d%H"), str(d['application']))
-    statistics = Database.Instance().statistics()
     statistics.update({'_id': key, 'key': d['key'], 'severity': d['severity'], 'date': key_date, 'application_id': d['application']}, {'$inc': {'count': 1} }, upsert=True)
 
     key = '%s-%s-%s-%s' % (d['key'], d['severity'], datetime.datetime.strftime(key_date, "%Y%m%d%H"), d['filename'])
-    statistics = Database.Instance().statistics()
     statistics.update({'_id': key, 'key': d['key'], 'severity': d['severity'], 'date': key_date, 'filename': d['filename']}, {'$inc': {'count': 1} }, upsert=True)
     
     statistics.ensure_index([('key', 1), ('severity', 1), ('date', 1 ), ('application_id', 1), ('filename', 1)])
 
-def get_exceptions_groups(key, application, severity=None, status=False, start=0, maxrecs=20, since=None):
+def get_statistics_for_application(application_id, severity=1, days_back=0):
+    application_id = ServicesTools.convert_to_object_id(application_id)
+    statistics = Database.Instance().statistics()
+
+    key_date = datetime.datetime.utcnow() - timedelta(hours=24)
+    key_date_start = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.hour, 0, 0)
+
+    key_date = datetime.datetime.utcnow()
+    key_date_end = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.day, 0, 0)
+
+    results = list(statistics.find(
+                                    {'application_id': application_id, 
+                                    'severity': severity, 
+                                    'date': {'$gt': key_date_start, '$lt': key_date_end } 
+                                    }
+                                  ).sort('date', -1))
+
+    stats = []
+    sd = key_date_start
+
+    for i in range(0, 24):
+        s = [r for r in results if r['date'] == sd]
+        if s:
+            stats.append({'date': sd, 'count': r['count'] })
+        else:
+            stats.append({'date': sd, 'count': 0 })
+
+        sd = sd + timedelta(hours=1)
+   
+    return stats
+
+
+def get_exceptions_groups(key, application, severity=None, status=False, start=0, maxrecs=20, since=None, sort='last_seen_on', sort_direction=-1):
 
     exception_groups = Database.Instance().exception_groups()
 
@@ -185,7 +218,7 @@ def get_exceptions_groups(key, application, severity=None, status=False, start=0
              'status': status,
             }
 
-    if severity:
+    if severity is not None:
         query['severity'] = severity
 
     if since:
@@ -194,7 +227,7 @@ def get_exceptions_groups(key, application, severity=None, status=False, start=0
 
         query['last_seen_on'] = {'$gt': since }
 
-    group_exceptions = exception_groups.find(query).sort('last_seen_on', -1).skip(start).limit(maxrecs)
+    group_exceptions = exception_groups.find(query).sort(sort, sort_direction).skip(start).limit(maxrecs)
 
     return group_exceptions
 

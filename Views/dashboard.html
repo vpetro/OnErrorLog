@@ -110,17 +110,16 @@
 </div>
 
 
-{% include "paging.html" %}
 <table class="zebra-striped">
     <thead>
         <tr>
         <th style="width: 1%"><input type="checkbox" id="select_all" /></th>
-        <th>Last Seen On</th>
+        <th>{% if not keyword %}<a href="/dashboard/{{ app_name }}?sort=last_seen_on&sort_direction={{lso_new_sort}}&{% if log_choice %}log_choice={{ log_choice }}&{% end %}severity_level={{ severity }}">Last Seen On</a>{% else %}Last Seen On{% end %}</th>
         <th>&nbsp;</th>
         <th>Message</th>
         <th>File</th>
         <th>Severity</th>
-        <th style="text-align: right;">Count</th>
+        <th style="text-align: right;">{% if not keyword %}<a href="/dashboard/{{ app_name }}?sort=count&sort_direction={{cnt_new_sort}}&{% if log_choice %}log_choice={{ log_choice }}&{% end %}severity_level={{ severity }}{% if keyword %}&keyword={{ keyword }}{% end %}">Count</a>{% else %}Count{% end %}</th>
         </tr>
     </thead>
     <tbody>
