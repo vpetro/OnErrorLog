@@ -60,11 +60,12 @@ def insert_exception(d):
         d['stacktrace'] = ''
 
     #Setup the string to be hashed
-    hash_string = '%s\n%s\n%s\n%s\n%s' % (d['key'], 
+    hash_string = '%s\n%s\n%s\n%s\n%s\n%s' % (d['key'], 
                                    d['severity'],
                                    str(d['stacktrace']),
                                    d['message'],
-                                   d['filename'])
+                                   d['filename'],
+                                   d['application'])
     
     #Has the string
     unique_hash = hash(hash_string)
@@ -179,7 +180,7 @@ def get_statistics_for_application(application_id, severity=1, days_back=0):
     application_id = ServicesTools.convert_to_object_id(application_id)
     statistics = Database.Instance().statistics()
 
-    key_date = datetime.datetime.utcnow() - timedelta(hours=24)
+    key_date = datetime.datetime.utcnow() - timedelta(days=days_back) - timedelta(hours=24)
     key_date_start = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.hour, 0, 0)
 
     key_date = datetime.datetime.utcnow()
@@ -198,12 +199,13 @@ def get_statistics_for_application(application_id, severity=1, days_back=0):
     for i in range(0, 24):
         s = [r for r in results if r['date'] == sd]
         if s:
-            stats.append({'date': sd, 'count': r['count'] })
+            stats.append({'date': sd, 'count': s[0]['count'] })
         else:
             stats.append({'date': sd, 'count': 0 })
 
         sd = sd + timedelta(hours=1)
    
+    print stats
     return stats
 
 

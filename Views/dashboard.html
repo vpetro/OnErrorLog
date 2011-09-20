@@ -1,9 +1,30 @@
 {% extends "base-sidebar.html" %}
 
 {% block scripts %}
+
+<script type="text/javascript" src="/js/jquery.flot.js"></script>
+<script type="text/javascript" src="/js/jquery.flot.resize.js"></script>
+
+
 <script type="text/javascript">
 
     $(document).ready(function() {
+
+        $.plot($("#placeholder"), [
+            {
+                data: {{ stats_data['today'] }},
+                lines: { show: true, fill: true },
+                color: "rgb(000, 127, 228)"
+            },
+            {
+                data: {{ stats_data['previous'] }},
+                lines: { show: true, fill: true },
+                color: "rgb(114, 141, 168)"
+            }
+            ], {'xaxis': { min: 0, tickSize: 1 } });
+
+        $("#placeholder").resize(function () { });
+        
 
         $('#severity_level').change(function() {
             $('#all')[0].checked = false;
@@ -109,6 +130,7 @@
         <input type="hidden" name="archive_all" id="archive_all" value="False" />
 </div>
 
+<div id="placeholder" style="width:100%; height:150px; margin: 10px 0 10px 0;"></div>
 
 <table class="zebra-striped">
     <thead>

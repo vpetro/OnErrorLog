@@ -1,6 +1,7 @@
 import tornado.web
 
 import re
+import json
 from Controllers.BaseHandler import BaseHandler
 from Services import LoggingService
 from Services import ApplicationService
@@ -169,8 +170,17 @@ class DashboardHandler(BaseDashboard):
 
         if app:
 
-            LoggingService.get_statistics_for_application(app['_id'])
+            stats_data = {'today': [], 'previous': [] }
+            
+            stats = LoggingService.get_statistics_for_application(app['_id'])
+            for i, s in enumerate(stats):
+                stats_data['today'].append([i, s['count']])
 
+            stats = LoggingService.get_statistics_for_application(app['_id'], days_back=1)
+            for i, s in enumerate(stats):
+                stats_data['previous'].append([i, s['count']])
+
+            self._data['stats_data'] = stats_data
             self._data['log_choice'] = log_choice
             self._data['severity'] = severity
             self._data['get_severity_string'] = LoggingService.get_severity_string
