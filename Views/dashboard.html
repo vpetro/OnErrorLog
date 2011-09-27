@@ -172,7 +172,7 @@
                         {% if len(exception['message'].strip()) == 0 %}
                             .:: NO MESSAGE ::.
                         {% else %}
-                            {{ exception['message'] }}
+                            {{ cgi.escape(exception['message']) }}
                         {% end %}
                     </a>
                 </td>

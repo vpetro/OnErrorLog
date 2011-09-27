@@ -184,7 +184,7 @@ def get_statistics_for_application(application_id, severity=1, days_back=0):
     key_date_start = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.hour, 0, 0)
 
     key_date = datetime.datetime.utcnow()
-    key_date_end = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.day, 0, 0)
+    key_date_end = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.hour, 0, 0)
 
     results = list(statistics.find(
                                     {'application_id': application_id, 

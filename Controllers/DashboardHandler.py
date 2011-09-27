@@ -1,7 +1,7 @@
 import tornado.web
 
 import re
-import json
+import cgi
 from Controllers.BaseHandler import BaseHandler
 from Services import LoggingService
 from Services import ApplicationService
@@ -172,11 +172,11 @@ class DashboardHandler(BaseDashboard):
 
             stats_data = {'today': [], 'previous': [] }
             
-            stats = LoggingService.get_statistics_for_application(app['_id'])
+            stats = LoggingService.get_statistics_for_application(app['_id'], severity=severity)
             for i, s in enumerate(stats):
                 stats_data['today'].append([i, s['count']])
 
-            stats = LoggingService.get_statistics_for_application(app['_id'], days_back=1)
+            stats = LoggingService.get_statistics_for_application(app['_id'], days_back=1, severity=severity)
             for i, s in enumerate(stats):
                 stats_data['previous'].append([i, s['count']])
 
@@ -188,10 +188,9 @@ class DashboardHandler(BaseDashboard):
             self._data['total_count'] = total_count
             self._data['lso_new_sort'] = lso_new_sort
             self._data['cnt_new_sort'] = cnt_new_sort
-
+            self._data['cgi'] = cgi
 
             self._compute_paging(page, total_count, app_name)
-        
             
             self._data['section_title'] = 'Dashboard : %s : %s' % (self._data['user']['company_name'], app['application'])
             self._data['application_name'] = app['application']
