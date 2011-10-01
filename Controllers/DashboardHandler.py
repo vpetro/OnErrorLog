@@ -268,11 +268,20 @@ class DetailsHandler(BaseDashboard):
                 if url:
                     s['url'] = '%s#L%s' % (url, s['line_number'])
 
+        stats_data = {'today': [], 'previous': [] }
+            
+        stats = LoggingService.get_statistics_for_exception_group(exception_group['_id'])
+        for i, s in enumerate(stats):
+            stats_data['today'].append([i, s['count']])
+
+        stats = LoggingService.get_statistics_for_exception_group(exception_group['_id'], days_back=1)
+        for i, s in enumerate(stats):
+            stats_data['previous'].append([i, s['count']])
+
+        self._data['stats_data'] = stats_data
         self._data['exception_group'] = exception_group
         self._data['exceptions'] = exceptions
         self._data['unique_hash'] = unique_hash
-        
-
         self._data['get_severity_string'] = LoggingService.get_severity_string
         self._data['section_title'] = '%s : %s' % (app['application'], self._data['exception_group']['message'][0:60])
         self._data['htmlTitle'] = 'OnErrorLog - Dashboard'

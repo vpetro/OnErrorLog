@@ -79,7 +79,7 @@ def insert_exception(d):
 
     #Check if the exception group exists
     group = exception_groups.find_one({'unique_hash': unique_hash, 'status': False })
-   
+
     #If Exception already exists, increment count
     if group:
         group['count'] += 1
@@ -111,7 +111,7 @@ def insert_exception(d):
     #Save the exception group
     exception_group_id = exception_groups.save(group)
 
-    increment_statistics(d)
+    increment_statistics(d, exception_group_id)
 
     #Update the Exception with the Exception Group Id
     exception['exception_group_id'] = exception_group_id
@@ -161,7 +161,7 @@ def insert_exception(d):
 
     return exception_group_id, exception_id
 
-def increment_statistics(d):
+def increment_statistics(d, exception_group_id):
     #Increment Statistics
     key_date = datetime.datetime.utcnow()
     key_date = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.hour)
@@ -172,11 +172,12 @@ def increment_statistics(d):
     statistics.update({'_id': key, 'key': d['key'], 'severity': d['severity'], 'date': key_date, 'application_id': d['application']}, {'$inc': {'count': 1} }, upsert=True)
 
     key = '%s-%s-%s-%s' % (d['key'], d['severity'], datetime.datetime.strftime(key_date, "%Y%m%d%H"), d['filename'])
-    statistics.update({'_id': key, 'key': d['key'], 'severity': d['severity'], 'date': key_date, 'filename': d['filename']}, {'$inc': {'count': 1} }, upsert=True)
+    statistics.update({'_id': key, 'key': d['key'], 'severity': d['severity'], 'date': key_date, 'exception_group_id': exception_group_id}, {'$inc': {'count': 1} }, upsert=True)
     
-    statistics.ensure_index([('key', 1), ('severity', 1), ('date', 1 ), ('application_id', 1), ('filename', 1)])
+    statistics.ensure_index([('key', 1), ('severity', 1), ('date', 1 ), ('application_id', 1), ('exception_group_id', 1)])
 
 def get_statistics_for_application(application_id, severity=1, days_back=0):
+
     application_id = ServicesTools.convert_to_object_id(application_id)
     statistics = Database.Instance().statistics()
 
@@ -205,9 +206,39 @@ def get_statistics_for_application(application_id, severity=1, days_back=0):
 
         sd = sd + timedelta(hours=1)
    
-    print stats
     return stats
 
+
+def get_statistics_for_exception_group(exception_group_id, days_back=0):
+
+    exception_group_id = ServicesTools.convert_to_object_id(exception_group_id)
+    statistics = Database.Instance().statistics()
+
+    key_date = datetime.datetime.utcnow() - timedelta(days=days_back) - timedelta(hours=24)
+    key_date_start = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.hour, 0, 0)
+
+    key_date = datetime.datetime.utcnow()
+    key_date_end = datetime.datetime(key_date.year, key_date.month, key_date.day, key_date.hour, 0, 0)
+
+    results = list(statistics.find(
+                                    {'exception_group_id': exception_group_id, 
+                                     'date': {'$gt': key_date_start, '$lt': key_date_end } 
+                                    }
+                                  ).sort('date', -1))
+
+    stats = []
+    sd = key_date_start
+
+    for i in range(0, 24):
+        s = [r for r in results if r['date'] == sd]
+        if s:
+            stats.append({'date': sd, 'count': s[0]['count'] })
+        else:
+            stats.append({'date': sd, 'count': 0 })
+
+        sd = sd + timedelta(hours=1)
+   
+    return stats
 
 def get_exceptions_groups(key, application, severity=None, status=False, start=0, maxrecs=20, since=None, sort='last_seen_on', sort_direction=-1):
 
